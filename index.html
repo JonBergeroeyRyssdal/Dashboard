@@ -10,8 +10,10 @@
       integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
       crossorigin="anonymous"
     />
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
+    <!-- Nav -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
       <div class="container-fluid">
         <button
@@ -77,5 +79,153 @@
         </div>
       </div>
     </nav>
+
+    <!-- DashBoard -->
+    <main class="">
+      <h1 class="text-center mb-5">
+        <img src="Company logo.png" alt="Company Logo" class="me-2" style="height: 1em;">
+        Reception Management DashBoard
+      </h1>
+      
+
+      <!--Staff Members-->
+      <section class="mx-5">
+        <h2 class="text-center">Staff Members</h2>
+        <div class="table-responsive">
+          <table class="table  table-hover table-bordered">
+            <thead class="">
+              <tr>
+                <th>Picture</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Out Time</th>
+                <th>Duration</th>
+                <th>Expected Return Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <img src="placeholder.png" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 50px; height: 50px;">
+                </td>
+                <td>John</td>
+                <td>Doe</td>
+                <td>johndoe@example.com</td>
+                <td>Active</td>
+                <td>08:30 AM</td>
+                <td>3 hrs</td>
+                <td>11:30 AM</td>
+              </tr>
+              <tr>
+                <td>
+                  <img src="placeholder.png" alt="Profile Picture" class="img-fluid rounded-circle" style="width: 50px; height: 50px;">
+                </td>
+                <td>Jane</td>
+                <td>Smith</td>
+                <td>janesmith@example.com</td>
+                <td>Inactive</td>
+                <td>09:00 AM</td>
+                <td>2 hrs</td>
+                <td>11:00 AM</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="d-flex justify-content-between">
+          <button type="button" class="btn btn-success px-5">In</button>
+          <button type="button" class="btn btn-danger px-5">Out</button>
+        </div>
+      </section>
+
+      <!--Schedule Delivery-->
+      <section class="mx-5">
+        <h2 class="text-center">Schedule Delivery</h2>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>Vehicle Type</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Telephone</th>
+                <th>Delivery Address</th>
+                <th>Return Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <select class="form-select">
+                    <option value="car">Car</option>
+                    <option value="motorbike">Motorbike</option>
+                  </select>
+                </td>
+                <td><input type="text" class="form-control" placeholder="Enter name"></td>
+                <td><input type="text" class="form-control" placeholder="Enter surname"></td>
+                <td><input type="tel" class="form-control" pattern="\d*" placeholder="Enter phone number" required></td>
+                <td><input type="text" class="form-control" placeholder="Enter delivery address"></td>
+                <td><input type="time" class="form-control"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-end">
+          <button type="button" class="btn btn-success px-5">Add</button>
+        </div>
+      </section>
+      
+
+      <!--Delivery Board-->
+      <section class="mx-5">
+        <h2 class="text-center">Delivery Board</h2>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover">
+            <thead>
+              <tr>
+                <th>Vehicle</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Delivery Address</th>
+                <th>Return Time</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- Example row, repeat for each delivery -->
+              <tr>
+                <td>Car</td>
+                <td>John</td>
+                <td>Doe</td>
+                <td>123 Main Street</td>
+                <td>11:30 AM</td>
+              </tr>
+              <tr>
+                <td>Motorbike</td>
+                <td>Jane</td>
+                <td>Smith</td>
+                <td>456 Elm Street</td>
+                <td>02:00 PM</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="text-end">
+          <button type="button" class="btn btn-danger px-5">Clear</button>
+        </div>
+      </section>
+      
+
+      <!--Date and time-->
+      <section>
+        <h3 id="currentDateTime" class="text-center"></h3>
+      </section>
+      
+      
+    </main>
+    <script src="wdt_app.js"></script>
+    <!-- Bootstrap JS & Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"></script>
   </body>
 </html>
