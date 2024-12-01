@@ -1,3 +1,5 @@
+// Calling five new staff memebers on page load
+
 $(document).ready(function () {
   const staffTable = $('#staffTable');
 
@@ -45,6 +47,8 @@ $(document).ready(function () {
   staffUserGet();
 });
 
+// Update time
+
 function updateDateTime() {
     const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
     const currentDate = new Date();
@@ -57,5 +61,5 @@ function updateDateTime() {
   // Call the function to display the date and time when the page loads
   updateDateTime();
 
-  // Optional: Update the time every second
+  // Update the time every second
   setInterval(updateDateTime, 1000);
