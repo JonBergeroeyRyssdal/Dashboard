@@ -20,6 +20,7 @@
             border-radius: 50%;
         }
     </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <h1>Random User API</h1>
@@ -32,29 +33,32 @@
     </div>
 
     <script>
-        document.getElementById('fetchUser').addEventListener('click', async () => {
-            const userCard = document.getElementById('userCard');
-            const userImage = document.getElementById('userImage');
-            const userName = document.getElementById('userName');
-            const userSurname = document.getElementById('userSurname');
-            const userEmail = document.getElementById('userEmail');
+        $('#fetchUser').on('click', function () {
+            const userCard = $('#userCard');
+            const userImage = $('#userImage');
+            const userName = $('#userName');
+            const userSurname = $('#userSurname');
+            const userEmail = $('#userEmail');
 
-            try {
-                const response = await fetch('https://randomapi.com/api/ses4o8b0?key=IQMP-42FS-QRXX-XQEU');
-                const data = await response.json();
-                const user = data.results[0];
+            $.ajax({
+                url: 'https://randomuser.me/api/',
+                dataType: 'json',
+                success: function (data) {
+                    const user = data.results[0];
 
-                // Update the UI with user information
-                userImage.src = user.picture;
-                userName.textContent = user.first;
-                userSurname.textContent = user.last;
-                userEmail.textContent = user.email;
-                
-                userCard.style.display = 'block'; // Show the user card
-            } catch (error) {
-                console.error('Error fetching user:', error);
-                alert('Failed to fetch user information.');
-            }
+                    // Update the UI with user information
+                    userImage.attr('src', user.picture.large);
+                    userName.text(user.name.first);
+                    userSurname.text(user.name.last);
+                    userEmail.text(user.email);
+
+                    userCard.show(); // Show the user card
+                },
+                error: function (error) {
+                    console.error('Error fetching user:', error);
+                    alert('Failed to fetch user information.');
+                }
+            });
         });
     </script>
 </body>
