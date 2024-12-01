@@ -72,12 +72,12 @@ $(document).ready(function () {
         const currentTime = new Date();
   
         // Calculate "Out Time"
-        const outTime = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        const outTime = currentTime.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
   
         // Calculate "Expected Return Time"
         const returnTime = new Date(currentTime.getTime() + minutesOut * 60000).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
+          hour: "2-digit",
+          minute: "2-digit",
         });
   
         // Convert minutes to hours and minutes
@@ -95,6 +95,31 @@ $(document).ready(function () {
       }
     });
   
+    // Add the "In" button functionality
+    $(".btn-success").on("click", function () {
+      if (!selectedRow) {
+        alert("Please select a staff member.");
+        return;
+      }
+  
+      // Update the selected staff member's information
+      const statusCell = selectedRow.find("td:nth-child(5)");
+      const outTimeCell = selectedRow.find("td:nth-child(6)");
+      const durationCell = selectedRow.find("td:nth-child(7)");
+      const returnTimeCell = selectedRow.find("td:nth-child(8)");
+  
+      // Update cells
+      statusCell.text("In");
+      outTimeCell.text("");
+      durationCell.text("");
+      returnTimeCell.text("");
+  
+      // Clear the selection
+      selectedRow.removeClass("bg-success");
+      selectedRow = null;
+    });
+  
+    // Deselect row when clicking outside the table
     $(document).on("click", function (e) {
       if (!staffTable[0].contains(e.target)) {
         if (selectedRow) {
@@ -114,15 +139,14 @@ $(document).ready(function () {
       };
       const currentDate = new Date();
       const dateString = currentDate.toLocaleDateString("en-US", options);
-      const timeString = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const timeString = currentDate.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   
-      document.getElementById(
-        "currentDateTime"
-      ).textContent = `${dateString}, ${timeString}`;
+      document.getElementById("currentDateTime").textContent = `${dateString}, ${timeString}`;
     }
   
     updateDateTime();
     setInterval(updateDateTime, 1000);
   });
+  
   
       
