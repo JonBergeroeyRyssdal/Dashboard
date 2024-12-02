@@ -1,37 +1,57 @@
 body {
-    font-family: Calibri, sans-serif;
-    color: #212529;
-  }
-  
+  font-family: Calibri, sans-serif;
+  color: #212529;
+}
 
+/* navbar */
 nav {
-    font-family: Consolas, monospace;
+  font-family: Consolas, monospace;
 }
 
 .nav-item {
-    background-color: #0E8EA8;
-    color: #fff;
+  background-color: #0e8ea8;
+  color: #fff;
 }
 
 .dropdown-item {
-    background-color: #83d1e1;
-    color: #212529;
+  background-color: #83d1e1;
+  color: #212529;
 }
 
+/* Staff dashboard */
 thead {
-    font-family: Consolas, monospace;
-    background-color: #0E8EA8;
-    color: #fff;
+  font-family: Consolas, monospace;
+  background-color: #0e8ea8;
+  color: #fff;
 }
 
 tbody {
-    font-family: Calibri, sans-serif;
-    background-color: #83D1E1;
-    color: #212529;
+  font-family: Calibri, sans-serif;
+  background-color: #83d1e1;
+  color: #212529;
 }
 
-/* Make the table cells square and align content */
 table td {
-    text-align: center;
-    vertical-align: middle;
-  }
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #333;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s, visibility 0.5s;
+}
+
+.toast.show {
+  opacity: 1;
+  visibility: visible;
+}
