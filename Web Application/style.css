@@ -29,3 +29,9 @@ tbody {
     background-color: #83D1E1;
     color: #212529;
 }
+
+/* Make the table cells square and align content */
+table td {
+    text-align: center;
+    vertical-align: middle;
+  }
