@@ -72,35 +72,28 @@ $(document).ready(function () {
     );
     if (minutesOut && !isNaN(minutesOut) && minutesOut > 0) {
       const currentTime = new Date();
-
-      // Calculate "Out Time"
       const outTime = currentTime.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
       });
-
-      // Calculate "Expected Return Time"
       const returnTime = new Date(
         currentTime.getTime() + minutesOut * 60000
-      ).toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+      ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-      // Convert minutes to hours and minutes
-      const hours = Math.floor(minutesOut / 60);
-      const minutes = minutesOut % 60;
-      const duration = `${hours > 0 ? hours + "h " : ""}${minutes}m`;
-
-      // Update the row
       selectedRow.find("td").eq(4).text("Out");
       selectedRow.find("td").eq(5).text(outTime);
-      selectedRow.find("td").eq(6).text(duration);
+      selectedRow
+        .find("td")
+        .eq(6)
+        .text(`${Math.floor(minutesOut / 60)}h ${minutesOut % 60}m`);
       selectedRow.find("td").eq(7).text(returnTime);
 
-      // Store the out time and expected return time for later comparison
-      selectedRow.data('outTime', currentTime);
-      selectedRow.data('returnTime', new Date(currentTime.getTime() + minutesOut * 60000));
+      selectedRow.data("outTime", currentTime);
+      selectedRow.data(
+        "returnTime",
+        new Date(currentTime.getTime() + minutesOut * 60000)
+      );
+      selectedRow.data("toastShown", false); // Reset toast flag
     } else {
       alert("Invalid input. Please enter a positive number.");
     }
@@ -171,60 +164,77 @@ $(document).ready(function () {
   setInterval(updateDateTime, 1000);
 
   // Check if a staff member is late
-  setInterval(function () {
-    staffTable.find("tr").each(function () {
-      const row = $(this);
-      const returnTime = row.data('returnTime');
-      const currentTime = new Date();
-
-      // Check if the staff member is late
-      if (returnTime && currentTime > returnTime) {
-        const outTime = row.data('outTime');
-        const minutesOut = Math.floor((currentTime - outTime) / 60000); // Difference in minutes
-
-        if (minutesOut > 0) {
-          staffMemberIsLate(row, minutesOut);
-        }
-      }
-    });
-  }, 60000); // Check every minute
-
-  // Function to show the toast with late information
   function staffMemberIsLate(row, minutesOut) {
+    if (row.data("toastShown")) {
+      // Update the existing toast with the new time
+      const uniqueId = `${row.find("td").eq(1).text()}-${row.find("td").eq(2).text()}`;
+      const toastElement = document.getElementById(uniqueId);
+  
+      if (toastElement) {
+        // Update the toast body with the new time
+        toastElement.querySelector(".toast-body").textContent = `${row.find("td").eq(1).text()} ${row.find("td").eq(2).text()} is ${minutesOut} minute(s) late.`;
+      }
+      return; // Do nothing if toast is already shown for this row
+    }
+  
     const firstName = row.find("td").eq(1).text();
     const lastName = row.find("td").eq(2).text();
     const picture = row.find("td").eq(0).find("img").attr("src");
-
-    // Create the toast element
-    var toastElement = document.createElement('div');
-    toastElement.classList.add('toast', 'bg-danger', 'text-white');
-    toastElement.setAttribute('role', 'alert');
-    toastElement.setAttribute('aria-live', 'assertive');
-    toastElement.setAttribute('aria-atomic', 'true');
-
+    const uniqueId = `${firstName}-${lastName}`; // Unique ID
+  
+    // Remove old toast if present
+    $(`#${uniqueId}`).remove();
+  
+    // Mark this row as having a toast shown
+    row.data("toastShown", true);
+  
+    // Create a new toast element
+    const toastElement = document.createElement("div");
+    toastElement.classList.add("toast", "bg-danger", "text-white");
+    toastElement.setAttribute("role", "alert");
+    toastElement.setAttribute("aria-live", "assertive");
+    toastElement.setAttribute("aria-atomic", "true");
+    toastElement.id = uniqueId;
+  
     toastElement.innerHTML = `
       <div class="toast-header">
         <img src="${picture}" class="rounded me-2" alt="Profile Picture">
         <strong class="me-auto">${firstName} ${lastName}</strong>
-        <small>${minutesOut} minute(s) late</small>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="toast-body">
-        This staff member has been out for ${minutesOut} minute(s).
+        ${firstName} ${lastName} is ${minutesOut} minute(s) late.
       </div>
     `;
-
-    // Append the toast element to the toast container
-    document.querySelector('.toast-container').appendChild(toastElement);
-
-    // Initialize the toast with autohide: false so it won't disappear automatically
-    var toast = new bootstrap.Toast(toastElement, {
-      autohide: false
-    });
-
-    // Show the toast
+  
+    document.querySelector(".toast-container").appendChild(toastElement);
+  
+    const toast = new bootstrap.Toast(toastElement, { autohide: false });
     toast.show();
+  
+    // Optionally remove the toastShown flag when the toast is closed
+    toastElement.addEventListener("hidden.bs.toast", function () {
+      row.data("toastShown", false); // Allow new toasts if late again
+    });
   }
+  
+  // Update the toast with new time every minute
+  setInterval(function () {
+    staffTable.find("tr").each(function () {
+      const row = $(this);
+      const returnTime = row.data("returnTime");
+      const currentTime = new Date();
+  
+      if (returnTime && currentTime > returnTime) {
+        const outTime = row.data("outTime");
+        const minutesOut = Math.floor((currentTime - outTime) / 60000);
+  
+        if (minutesOut > 0) {
+          staffMemberIsLate(row, minutesOut); // Update the existing toast
+        }
+      }
+    });
+  }, 60000); // Check every minute
+  
 });
 
-  
