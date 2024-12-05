@@ -37,21 +37,13 @@ table td {
 }
 
 /* Toast */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background-color: #333;
-  color: white;
-  padding: 10px 20px;
-  border-radius: 5px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.5s, visibility 0.5s;
-}
+.toast-container {
+    position: fixed;
+    top: 1rem; /* Adjust the position */
+    right: 1rem; /* Toasts will appear on the top-right corner */
+    z-index: 1050;
+  }
+  .toast {
+    margin-bottom: 0.5rem; /* Adds space between each toast */
+  }
 
-.toast.show {
-  opacity: 1;
-  visibility: visible;
-}

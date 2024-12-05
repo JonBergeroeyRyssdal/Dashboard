@@ -96,31 +96,31 @@
       <section class="mx-5">
         <h2 class="text-center">Staff Members</h2>
         <div class="table-responsive">
-            <table class="table table-hover table-bordered">
-                <thead>
-                    <tr>
-                        <th>Picture</th>
-                        <th>Name</th>
-                        <th>Surname</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Out Time</th>
-                        <th>Duration</th>
-                        <th>Expected Return Time</th>
-                    </tr>
-                </thead>
-                <tbody id="staffTable">
-                    <!-- Rows will be added dynamically -->
-                </tbody>
-            </table>
+          <table class="table table-hover table-bordered">
+            <thead>
+              <tr>
+                <th>Picture</th>
+                <th>Name</th>
+                <th>Surname</th>
+                <th>Email</th>
+                <th>Status</th>
+                <th>Out Time</th>
+                <th>Duration</th>
+                <th>Expected Return Time</th>
+              </tr>
+            </thead>
+            <tbody id="staffTable">
+              <!-- Rows will be added dynamically -->
+            </tbody>
+          </table>
         </div>
         <div class="d-flex justify-content-between">
-            <button type="button" class="btn btn-success px-5">In</button>
-            <button type="button" class="btn btn-danger px-5">Out</button>
+          <button type="button" class="btn btn-success px-5">In</button>
+          <button type="button" class="btn btn-danger px-5">Out</button>
         </div>
-    </section>
+      </section>
 
-    <div id="notification-container"></div>
+      <div id="notification-container"></div>
 
       <!--Schedule Delivery-->
       <section class="mx-5">
@@ -229,18 +229,9 @@
       </section>
     </main>
 
-    <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="toast-header">
-        <img src="..." class="rounded me-2" alt="...">
-        <strong class="me-auto">Bootstrap</strong>
-        <small>11 mins ago</small>
-        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      </div>
-      <div class="toast-body">
-        Hello, world! This is a toast message.
-      </div>
+    <div class="toast-container">
     </div>
-    
+
     <!--Java Script-->
     <!-- Bootstrap JS & Popper.js -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
@@ -249,11 +240,5 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!--My JS-->
     <script src="wdt_app.js"></script>
-    <script>
-      // Initialize and show the toast
-      var toastEl = document.querySelector('.toast');
-      var toast = new bootstrap.Toast(toastEl);
-      toast.show();
-    </script>
   </body>
 </html>
