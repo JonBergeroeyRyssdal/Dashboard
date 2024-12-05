@@ -4,23 +4,23 @@ $(document).ready(function () {
   // Function to create a table row
   function createRow(user) {
     return `
-          <tr>
-              <td>
-                  <img
-                      src="${user.picture.thumbnail}"
-                      alt="Profile Picture"
-                      class="img-fluid rounded-circle"
-                      style="width: 50px; height: 50px"
-                  />
-              </td>
-              <td>${user.name.first}</td>
-              <td>${user.name.last}</td>
-              <td>${user.email}</td>
-              <td>In</td>
-              <td></td>
-              <td></td>
-              <td></td>
-          </tr>`;
+      <tr>
+        <td>
+          <img
+            src="${user.picture.thumbnail}"
+            alt="Profile Picture"
+            class="img-fluid rounded-circle"
+            style="width: 50px; height: 50px"
+          />
+        </td>
+        <td>${user.name.first}</td>
+        <td>${user.name.last}</td>
+        <td>${user.email}</td>
+        <td>In</td>
+        <td></td>
+        <td></td>
+        <td></td>
+      </tr>`;
   }
 
   // Function to fetch staff users
@@ -97,6 +97,10 @@ $(document).ready(function () {
       selectedRow.find("td").eq(5).text(outTime);
       selectedRow.find("td").eq(6).text(duration);
       selectedRow.find("td").eq(7).text(returnTime);
+
+      // Store the out time and expected return time for later comparison
+      selectedRow.data('outTime', currentTime);
+      selectedRow.data('returnTime', new Date(currentTime.getTime() + minutesOut * 60000));
     } else {
       alert("Invalid input. Please enter a positive number.");
     }
@@ -165,41 +169,62 @@ $(document).ready(function () {
 
   updateDateTime();
   setInterval(updateDateTime, 1000);
-});
 
-function showToast() {
+  // Check if a staff member is late
+  setInterval(function () {
+    staffTable.find("tr").each(function () {
+      const row = $(this);
+      const returnTime = row.data('returnTime');
+      const currentTime = new Date();
+
+      // Check if the staff member is late
+      if (returnTime && currentTime > returnTime) {
+        const outTime = row.data('outTime');
+        const minutesOut = Math.floor((currentTime - outTime) / 60000); // Difference in minutes
+
+        if (minutesOut > 0) {
+          staffMemberIsLate(row, minutesOut);
+        }
+      }
+    });
+  }, 60000); // Check every minute
+
+  // Function to show the toast with late information
+  function staffMemberIsLate(row, minutesOut) {
+    const firstName = row.find("td").eq(1).text();
+    const lastName = row.find("td").eq(2).text();
+    const picture = row.find("td").eq(0).find("img").attr("src");
+
     // Create the toast element
     var toastElement = document.createElement('div');
     toastElement.classList.add('toast', 'bg-danger', 'text-white');
     toastElement.setAttribute('role', 'alert');
     toastElement.setAttribute('aria-live', 'assertive');
     toastElement.setAttribute('aria-atomic', 'true');
-  
+
     toastElement.innerHTML = `
       <div class="toast-header">
-        <img src="..." class="rounded me-2" alt="...">
-        <strong class="me-auto">Bootstrap</strong>
-        <small>Now</small>
+        <img src="${picture}" class="rounded me-2" alt="Profile Picture">
+        <strong class="me-auto">${firstName} ${lastName}</strong>
+        <small>${minutesOut} minute(s) late</small>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="toast-body">
-        This is a custom toast message.
+        This staff member has been out for ${minutesOut} minute(s).
       </div>
     `;
-  
+
     // Append the toast element to the toast container
     document.querySelector('.toast-container').appendChild(toastElement);
-  
+
     // Initialize the toast with autohide: false so it won't disappear automatically
     var toast = new bootstrap.Toast(toastElement, {
       autohide: false
     });
-  
+
     // Show the toast
     toast.show();
   }
-  
-  // Call the function to show the toast
-  showToast();
-  showToast();
+});
+
   
