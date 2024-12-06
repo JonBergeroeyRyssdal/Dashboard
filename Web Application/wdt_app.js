@@ -128,7 +128,7 @@ $(document).ready(function () {
   }
 
   // Attach the staffIn function to the "In" button
-  $(".btn-success").on("click", staffIn);
+  $("#in-button").on("click", staffIn);
 
   // Deselect row when clicking outside the table
   $(document).on("click", function (e) {
