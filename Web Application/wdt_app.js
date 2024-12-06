@@ -66,7 +66,7 @@ $(document).ready(function () {
       alert("Please select a staff member.");
       return;
     }
-
+  
     const minutesOut = prompt(
       "Please enter the number of minutes the staff member is out:"
     );
@@ -79,7 +79,7 @@ $(document).ready(function () {
       const returnTime = new Date(
         currentTime.getTime() + minutesOut * 60000
       ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-
+  
       selectedRow.find("td").eq(4).text("Out");
       selectedRow.find("td").eq(5).text(outTime);
       selectedRow
@@ -87,17 +87,18 @@ $(document).ready(function () {
         .eq(6)
         .text(`${Math.floor(minutesOut / 60)}h ${minutesOut % 60}m`);
       selectedRow.find("td").eq(7).text(returnTime);
-
+  
       selectedRow.data("outTime", currentTime);
       selectedRow.data(
         "returnTime",
         new Date(currentTime.getTime() + minutesOut * 60000)
       );
       selectedRow.data("toastShown", false); // Reset toast flag
+      selectedRow.data("dismissedToast", false); // Reset dismissed state
     } else {
       alert("Invalid input. Please enter a positive number.");
     }
-  }
+  }  
 
   // Attach the staffOut function to the "Out" button
   $(".btn-danger").on("click", staffOut);
@@ -163,18 +164,9 @@ $(document).ready(function () {
   updateDateTime();
   setInterval(updateDateTime, 1000);
 
-  // Check if a staff member is late
   function staffMemberIsLate(row, minutesOut) {
-    if (row.data("toastShown")) {
-      // Update the existing toast with the new time
-      const uniqueId = `${row.find("td").eq(1).text()}-${row.find("td").eq(2).text()}`;
-      const toastElement = document.getElementById(uniqueId);
-  
-      if (toastElement) {
-        // Update the toast body with the new time
-        toastElement.querySelector(".toast-body").textContent = `${row.find("td").eq(1).text()} ${row.find("td").eq(2).text()} is ${minutesOut} minute(s) late.`;
-      }
-      return; // Do nothing if toast is already shown for this row
+    if (row.data("dismissedToast")) {
+      return; // Skip if the toast was manually dismissed
     }
   
     const firstName = row.find("td").eq(1).text();
@@ -212,29 +204,28 @@ $(document).ready(function () {
     const toast = new bootstrap.Toast(toastElement, { autohide: false });
     toast.show();
   
-    // Optionally remove the toastShown flag when the toast is closed
+    // Handle the manual dismissal of the toast
     toastElement.addEventListener("hidden.bs.toast", function () {
-      row.data("toastShown", false); // Allow new toasts if late again
+      row.data("dismissedToast", true); // Mark the toast as dismissed
     });
   }
   
+
   // Update the toast with new time every minute
   setInterval(function () {
     staffTable.find("tr").each(function () {
       const row = $(this);
       const returnTime = row.data("returnTime");
       const currentTime = new Date();
-  
+
       if (returnTime && currentTime > returnTime) {
         const outTime = row.data("outTime");
         const minutesOut = Math.floor((currentTime - outTime) / 60000);
-  
+
         if (minutesOut > 0) {
           staffMemberIsLate(row, minutesOut); // Update the existing toast
         }
       }
     });
   }, 60000); // Check every minute
-  
 });
-
