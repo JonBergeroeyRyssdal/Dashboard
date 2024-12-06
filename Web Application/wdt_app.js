@@ -1,5 +1,6 @@
 $(document).ready(function () {
   const staffTable = $("#staffTable");
+  const deliveryBoardTable = $("#deliveryBoard tbody");
 
   // Function to create a table row
   function createRow(user) {
@@ -44,25 +45,25 @@ $(document).ready(function () {
   // Calling the staffUserGet function
   staffUserGet();
 
-  let selectedRow = null;
+  let selectedStaffRow = null;
 
   // Click event listener to each row to toggle the 'bg-success' class
   staffTable.on("click", "tr", function () {
-    if (selectedRow) {
-      selectedRow.removeClass("bg-success");
+    if (selectedStaffRow) {
+      selectedStaffRow.removeClass("bg-success");
     }
 
-    if (selectedRow && selectedRow[0] === this) {
-      selectedRow = null;
+    if (selectedStaffRow && selectedStaffRow[0] === this) {
+      selectedStaffRow = null;
     } else {
-      selectedRow = $(this);
-      selectedRow.addClass("bg-success");
+      selectedStaffRow = $(this);
+      selectedStaffRow.addClass("bg-success");
     }
   });
 
   // "Out" button
   function staffOut() {
-    if (!selectedRow) {
+    if (!selectedStaffRow) {
       alert("Please select a staff member.");
       return;
     }
@@ -80,21 +81,21 @@ $(document).ready(function () {
         currentTime.getTime() + minutesOut * 60000
       ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 
-      selectedRow.find("td").eq(4).text("Out");
-      selectedRow.find("td").eq(5).text(outTime);
-      selectedRow
+      selectedStaffRow.find("td").eq(4).text("Out");
+      selectedStaffRow.find("td").eq(5).text(outTime);
+      selectedStaffRow
         .find("td")
         .eq(6)
         .text(`${Math.floor(minutesOut / 60)}h ${minutesOut % 60}m`);
-      selectedRow.find("td").eq(7).text(returnTime);
+      selectedStaffRow.find("td").eq(7).text(returnTime);
 
-      selectedRow.data("outTime", currentTime);
-      selectedRow.data(
+      selectedStaffRow.data("outTime", currentTime);
+      selectedStaffRow.data(
         "returnTime",
         new Date(currentTime.getTime() + minutesOut * 60000)
       );
-      selectedRow.data("toastShown", false); // Reset toast flag
-      selectedRow.data("dismissedToast", false); // Reset dismissed state
+      selectedStaffRow.data("toastShown", false); // Reset toast flag
+      selectedStaffRow.data("dismissedToast", false); // Reset dismissed state
     } else {
       alert("Invalid input. Please enter a positive number.");
     }
@@ -105,16 +106,16 @@ $(document).ready(function () {
 
   // Function to handle marking a staff member as "In"
   function staffIn() {
-    if (!selectedRow) {
+    if (!selectedStaffRow) {
       alert("Please select a staff member.");
       return;
     }
 
     // Update the selected staff member's information
-    const statusCell = selectedRow.find("td:nth-child(5)");
-    const outTimeCell = selectedRow.find("td:nth-child(6)");
-    const durationCell = selectedRow.find("td:nth-child(7)");
-    const returnTimeCell = selectedRow.find("td:nth-child(8)");
+    const statusCell = selectedStaffRow.find("td:nth-child(5)");
+    const outTimeCell = selectedStaffRow.find("td:nth-child(6)");
+    const durationCell = selectedStaffRow.find("td:nth-child(7)");
+    const returnTimeCell = selectedStaffRow.find("td:nth-child(8)");
 
     // Update cells
     statusCell.text("In");
@@ -123,8 +124,8 @@ $(document).ready(function () {
     returnTimeCell.text("");
 
     // Clear the selection
-    selectedRow.removeClass("bg-success");
-    selectedRow = null;
+    selectedStaffRow.removeClass("bg-success");
+    selectedStaffRow = null;
   }
 
   // Attach the staffIn function to the "In" button
@@ -133,9 +134,9 @@ $(document).ready(function () {
   // Deselect row when clicking outside the table
   $(document).on("click", function (e) {
     if (!staffTable[0].contains(e.target)) {
-      if (selectedRow) {
-        selectedRow.removeClass("bg-success");
-        selectedRow = null;
+      if (selectedStaffRow) {
+        selectedStaffRow.removeClass("bg-success");
+        selectedStaffRow = null;
       }
     }
   });
@@ -227,6 +228,36 @@ $(document).ready(function () {
       }
     });
   }, 60000); // Check every minute
+
+  let selectedDeliveryRow = null;
+
+  // Click event listener to each row to toggle the 'bg-success' class
+  deliveryBoardTable.on("click", "tr", function () {
+    if (selectedDeliveryRow) {
+      selectedDeliveryRow.removeClass("bg-success");
+    }
+
+    if (selectedDeliveryRow && selectedDeliveryRow[0] === this) {
+      selectedDeliveryRow = null;
+    } else {
+      selectedDeliveryRow = $(this);
+      selectedDeliveryRow.addClass("bg-success");
+    }
+  });
+
+  // Logic to remove the "bg-success" class when clicking anywhere else on the page
+$(document).on("click", function () {
+  // If a row is selected, remove the "bg-success" class
+  if (selectedDeliveryRow) {
+    selectedDeliveryRow.removeClass("bg-success");
+    selectedDeliveryRow = null;
+  }
+});
+
+  // Prevent click event on the delivery board table from propagating to document
+  deliveryBoardTable.on("click", function (event) {
+    event.stopPropagation();
+  });
 
   // Function to handle adding a new delivery
   function addDelivery() {
