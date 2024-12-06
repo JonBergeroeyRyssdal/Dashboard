@@ -66,7 +66,7 @@ $(document).ready(function () {
       alert("Please select a staff member.");
       return;
     }
-  
+
     const minutesOut = prompt(
       "Please enter the number of minutes the staff member is out:"
     );
@@ -79,7 +79,7 @@ $(document).ready(function () {
       const returnTime = new Date(
         currentTime.getTime() + minutesOut * 60000
       ).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  
+
       selectedRow.find("td").eq(4).text("Out");
       selectedRow.find("td").eq(5).text(outTime);
       selectedRow
@@ -87,7 +87,7 @@ $(document).ready(function () {
         .eq(6)
         .text(`${Math.floor(minutesOut / 60)}h ${minutesOut % 60}m`);
       selectedRow.find("td").eq(7).text(returnTime);
-  
+
       selectedRow.data("outTime", currentTime);
       selectedRow.data(
         "returnTime",
@@ -98,7 +98,7 @@ $(document).ready(function () {
     } else {
       alert("Invalid input. Please enter a positive number.");
     }
-  }  
+  }
 
   // Attach the staffOut function to the "Out" button
   $(".btn-danger").on("click", staffOut);
@@ -168,18 +168,18 @@ $(document).ready(function () {
     if (row.data("dismissedToast")) {
       return; // Skip if the toast was manually dismissed
     }
-  
+
     const firstName = row.find("td").eq(1).text();
     const lastName = row.find("td").eq(2).text();
     const picture = row.find("td").eq(0).find("img").attr("src");
     const uniqueId = `${firstName}-${lastName}`; // Unique ID
-  
+
     // Remove old toast if present
     $(`#${uniqueId}`).remove();
-  
+
     // Mark this row as having a toast shown
     row.data("toastShown", true);
-  
+
     // Create a new toast element
     const toastElement = document.createElement("div");
     toastElement.classList.add("toast", "bg-danger", "text-white");
@@ -187,7 +187,7 @@ $(document).ready(function () {
     toastElement.setAttribute("aria-live", "assertive");
     toastElement.setAttribute("aria-atomic", "true");
     toastElement.id = uniqueId;
-  
+
     toastElement.innerHTML = `
       <div class="toast-header">
         <img src="${picture}" class="rounded me-2" alt="Profile Picture">
@@ -198,18 +198,17 @@ $(document).ready(function () {
         ${firstName} ${lastName} is ${minutesOut} minute(s) late.
       </div>
     `;
-  
+
     document.querySelector(".toast-container").appendChild(toastElement);
-  
+
     const toast = new bootstrap.Toast(toastElement, { autohide: false });
     toast.show();
-  
+
     // Handle the manual dismissal of the toast
     toastElement.addEventListener("hidden.bs.toast", function () {
       row.data("dismissedToast", true); // Mark the toast as dismissed
     });
   }
-  
 
   // Update the toast with new time every minute
   setInterval(function () {
@@ -228,4 +227,54 @@ $(document).ready(function () {
       }
     });
   }, 60000); // Check every minute
+
+  // Function to handle adding a new delivery
+  function addDelivery() {
+    // Get the input values from the "Schedule Delivery" table
+    const vehicle = document.querySelector("select.form-select").value;
+    const name = document.querySelector(
+      'input[placeholder="Enter name"]'
+    ).value;
+    const surname = document.querySelector(
+      'input[placeholder="Enter surname"]'
+    ).value;
+    const phone = document.querySelector(
+      'input[placeholder="Enter phone number"]'
+    ).value; // Optional: validate if needed
+    const address = document.querySelector(
+      'input[placeholder="Enter delivery address"]'
+    ).value;
+    const returnTime = document.querySelector('input[type="time"]').value;
+
+    // Ensure all fields are filled
+    if (!vehicle || !name || !surname || !address || !returnTime) {
+      alert("Please fill in all fields before adding.");
+      return;
+    }
+
+    // Get the tbody element of the "Delivery Board" table
+    const deliveryBoardBody = $("#deliveryBoard tbody");
+
+    // Create a new row for the "Delivery Board"
+    const newRow = `
+      <tr>
+        <td>${vehicle}</td>
+        <td>${name}</td>
+        <td>${surname}</td>
+        <td>${phone}</td>
+        <td>${address}</td>
+        <td>${returnTime}</td>
+      </tr>
+    `;
+
+    // Append the new row to the "Delivery Board" table
+    deliveryBoardBody.append(newRow);
+
+    // Optionally, clear the input fields after adding
+    $("select.form-select").val("car"); // Reset to default
+    $(".form-control").val(""); // Clear all input fields
+  }
+
+  // Attach event listener to the "Add" button
+  $("#addDeliveryBtn").on("click", addDelivery);
 });

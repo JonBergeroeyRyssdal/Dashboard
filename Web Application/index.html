@@ -181,7 +181,7 @@
           </table>
         </div>
         <div class="text-end">
-          <button type="button" class="btn btn-success px-5">Add</button>
+          <button id="addDeliveryBtn" type="button" class="btn btn-success px-5">Add</button>
         </div>
       </section>
 
@@ -189,32 +189,19 @@
       <section class="mx-5">
         <h2 class="text-center">Delivery Board</h2>
         <div class="table-responsive">
-          <table class="table table-bordered table-hover">
+          <table id="deliveryBoard" class="table table-bordered table-hover">
             <thead>
               <tr>
-                <th>Vehicle</th>
+                <th>Vehicle Type</th>
                 <th>Name</th>
                 <th>Surname</th>
+                <th>Telephone</th>
                 <th>Delivery Address</th>
                 <th>Return Time</th>
               </tr>
             </thead>
             <tbody>
-              <!-- Example row, repeat for each delivery -->
-              <tr>
-                <td>Car</td>
-                <td>John</td>
-                <td>Doe</td>
-                <td>123 Main Street</td>
-                <td>11:30 AM</td>
-              </tr>
-              <tr>
-                <td>Motorbike</td>
-                <td>Jane</td>
-                <td>Smith</td>
-                <td>456 Elm Street</td>
-                <td>02:00 PM</td>
-              </tr>
+              
             </tbody>
           </table>
         </div>
@@ -229,8 +216,7 @@
       </section>
     </main>
 
-    <div class="toast-container">
-    </div>
+    <div class="toast-container"></div>
 
     <!--Java Script-->
     <!-- Bootstrap JS & Popper.js -->
