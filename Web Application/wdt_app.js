@@ -1,6 +1,5 @@
 $(document).ready(function () {
   const staffTable = $("#staffTable");
-  const deliveryBoardTable = $("#deliveryBoard tbody");
 
   // Function to create a table row
   function createRow(user) {
@@ -229,6 +228,7 @@ $(document).ready(function () {
     });
   }, 60000); // Check every minute
 
+  const deliveryBoardTable = $("#deliveryBoard tbody");
   let selectedDeliveryRow = null;
 
   // Click event listener to each row to toggle the 'bg-success' class
@@ -246,13 +246,13 @@ $(document).ready(function () {
   });
 
   // Logic to remove the "bg-success" class when clicking anywhere else on the page
-$(document).on("click", function () {
-  // If a row is selected, remove the "bg-success" class
-  if (selectedDeliveryRow) {
-    selectedDeliveryRow.removeClass("bg-success");
-    selectedDeliveryRow = null;
-  }
-});
+  $(document).on("click", function () {
+    // If a row is selected, remove the "bg-success" class
+    if (selectedDeliveryRow) {
+      selectedDeliveryRow.removeClass("bg-success");
+      selectedDeliveryRow = null;
+    }
+  });
 
   // Prevent click event on the delivery board table from propagating to document
   deliveryBoardTable.on("click", function (event) {
@@ -283,13 +283,23 @@ $(document).on("click", function () {
       return;
     }
 
+    // Determine the icon based on the vehicle type
+    let vehicleIcon;
+    if (vehicle === "Car") {
+      vehicleIcon = `<i class="fas fa-car"></i>`; // Font Awesome car icon
+    } else if (vehicle === "Motorbike") {
+      vehicleIcon = `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
+    } else {
+      vehicleIcon = vehicle; // Default fallback
+    }
+
     // Get the tbody element of the "Delivery Board" table
     const deliveryBoardBody = $("#deliveryBoard tbody");
 
     // Create a new row for the "Delivery Board"
     const newRow = `
       <tr>
-        <td>${vehicle}</td>
+        <td>${vehicleIcon}</td>
         <td>${name}</td>
         <td>${surname}</td>
         <td>${phone}</td>
@@ -302,7 +312,7 @@ $(document).on("click", function () {
     deliveryBoardBody.append(newRow);
 
     // Optionally, clear the input fields after adding
-    $("select.form-select").val("car"); // Reset to default
+    $("select.form-select").val("Car"); // Reset to default
     $(".form-control").val(""); // Clear all input fields
   }
 
