@@ -299,12 +299,12 @@ $(document).ready(function () {
     // Create a new row for the "Delivery Board"
     const newRow = `
       <tr>
-        <td>${vehicleIcon}</td>
-        <td>${name}</td>
-        <td>${surname}</td>
-        <td>${phone}</td>
-        <td>${address}</td>
-        <td>${returnTime}</td>
+        <td class="text-center">${vehicleIcon}</td>
+        <td class="text-center">${name}</td>
+        <td class="text-center">${surname}</td>
+        <td class="text-center">${phone}</td>
+        <td class="text-center">${address}</td>
+        <td class="text-center">${returnTime}</td>
       </tr>
     `;
 
