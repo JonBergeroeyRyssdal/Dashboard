@@ -140,9 +140,7 @@ $(document).ready(function () {
     }
   });
 
-  
-
-  // Toast that tells if the delivery driver is late
+  // Toast that tells if the staff memeber is late
   function staffMemberIsLate(row, minutesOut) {
     if (row.data("dismissedToast")) {
       return; // Skip if the toast was manually dismissed
@@ -174,7 +172,7 @@ $(document).ready(function () {
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="toast-body">
-        ${firstName} ${lastName} is ${minutesOut} minute(s) late.
+        Staff member ${firstName} ${lastName} is ${minutesOut} minute(s) late.
       </div>
     `;
 
@@ -303,18 +301,17 @@ $(document).ready(function () {
     if (row.data("dismissedToast")) {
       return; // Skip if the toast was manually dismissed
     }
-
     const name = row.find("td").eq(1).text(); // First Name
     const surname = row.find("td").eq(2).text(); // Last Name
     const vehicle = row.find("td").eq(0).html(); // Vehicle Icon
+    const phone = row.find("td").eq(3).text(); // Phone
+    const address = row.find("td").eq(4).text(); // Address
+    const returnTime = row.find("td").eq(5).text(); // Return Time
     const uniqueId = `delivery-${name}-${surname}`; // Unique ID
-
     // Remove old toast if present
     $(`#${uniqueId}`).remove();
-
     // Mark this row as having a toast shown
     row.data("toastShown", true);
-
     // Create a new toast element
     const toastElement = document.createElement("div");
     toastElement.classList.add("toast", "bg-warning", "text-black");
@@ -322,40 +319,29 @@ $(document).ready(function () {
     toastElement.setAttribute("aria-live", "assertive");
     toastElement.setAttribute("aria-atomic", "true");
     toastElement.id = uniqueId;
-
     toastElement.innerHTML = `
       <div class="toast-header">
-        ${vehicle}
+        ${vehicle}&nbsp
         <strong class="me-auto">${name} ${surname}</strong>
         <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
       </div>
       <div class="toast-body">
-        Delivery driver ${name} ${surname} is ${minutesLate} minute(s) late.
+        Delivery driver ${name} ${surname} is ${minutesLate} minute(s) late.<br>
+        <strong>Phone:</strong> ${phone}<br>
+        <strong>Address:</strong> ${address}<br>
+        <strong>Estimated Return Time:</strong> ${returnTime}
       </div>
-    `;
-
+  `;
     document.querySelector(".toast-container").appendChild(toastElement);
-
     const toast = new bootstrap.Toast(toastElement, { autohide: false });
     toast.show();
-
     // Handle the manual dismissal of the toast
     toastElement.addEventListener("hidden.bs.toast", function () {
       row.data("dismissedToast", true); // Mark the toast as dismissed
     });
   }
 
-  // Function to clear the selected delivery driver
-  $("#clear-button").on("click", function () {
-    if (!selectedDeliveryRow) {
-      alert("Please select a delivery driver to clear.");
-      return;
-    }
-
-    // Remove the selected row from the table
-    selectedDeliveryRow.remove();
-    selectedDeliveryRow = null; // Reset the selection
-  });
+  // Updates every minute the toast
   setInterval(function () {
     deliveryBoardTable.find("tr").each(function () {
       const row = $(this);
@@ -378,8 +364,20 @@ $(document).ready(function () {
     });
   }, 60000); // Check every minute
 
+  // Function to clear the selected delivery driver
+  $("#clear-button").on("click", function () {
+    if (!selectedDeliveryRow) {
+      alert("Please select a delivery driver to clear.");
+      return;
+    }
+
+    // Remove the selected row from the table
+    selectedDeliveryRow.remove();
+    selectedDeliveryRow = null; // Reset the selection
+  });
+
   // Update the date and time dynamically
-  function digitalClock() {
+  function updateDateTime() {
     const options = {
       weekday: "long",
       year: "numeric",
@@ -399,6 +397,6 @@ $(document).ready(function () {
     ).textContent = `${dateString}, ${timeString}`;
   }
 
-  digitalClock();
+  updateDateTime();
   setInterval(updateDateTime, 1000);
 });

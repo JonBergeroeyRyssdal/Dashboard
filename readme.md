@@ -67,6 +67,7 @@ This project involves creating a **Reception Management Dashboard** for **WeDeli
   - Bootstrap 5 (included via CDN)
   - jQuery (included via CDN)
   - Random User API (used to generate demo staff)
+  - Font awsome for icons
 
    ```
 
