@@ -365,16 +365,23 @@ $(document).ready(function () {
   }, 60000); // Check every minute
 
   // Function to clear the selected delivery driver
-  $("#clear-button").on("click", function () {
-    if (!selectedDeliveryRow) {
-      alert("Please select a delivery driver to clear.");
-      return;
-    }
+$("#clear-button").on("click", function () {
+  if (!selectedDeliveryRow) {
+    alert("Please select a delivery driver to clear.");
+    return;
+  }
 
+  // Confirmation dialog before removing the row
+  const confirmRemoval = confirm("Are you sure you want to remove this delivery driver?");
+  
+  // If user clicks "OK", remove the row
+  if (confirmRemoval) {
     // Remove the selected row from the table
     selectedDeliveryRow.remove();
     selectedDeliveryRow = null; // Reset the selection
-  });
+  }
+});
+
 
   // Update the date and time dynamically
   function updateDateTime() {
