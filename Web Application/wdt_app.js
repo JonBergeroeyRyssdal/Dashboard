@@ -1,5 +1,3 @@
-const staffTable = $("#staffTable");
-
 // ----------Classes----------
 
 // Parent
@@ -10,6 +8,7 @@ class Employee {
   }
 }
 
+// Child 1
 class StaffMember extends Employee {
   constructor(
     name,
@@ -17,8 +16,8 @@ class StaffMember extends Employee {
     picture,
     email,
     status = "In",
-    outTime = "",
-    duration = "",
+    outTime = null,
+    duration = null,
     expectedReturnTime = null
   ) {
     super(name, surname);
@@ -29,20 +28,22 @@ class StaffMember extends Employee {
     this.duration = duration;
     this.expectedReturnTime = expectedReturnTime;
   }
-
   staffMemberIsLate() {
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
-  
-    if ((currentTime - expectedReturnTime) / (1000 * 60) > 1) { // Convert milliseconds to minutes
-      const minutesLate = Math.floor((currentTime - expectedReturnTime) / (1000 * 60)); // Calculate minutes late
+
+    if ((currentTime - expectedReturnTime) / (1000 * 60) > 1) {
+      // Convert milliseconds to minutes
+      const minutesLate = Math.floor(
+        (currentTime - expectedReturnTime) / (1000 * 60)
+      ); // Calculate minutes late
       const toastElement = document.createElement("div");
-  
+
       toastElement.classList.add("toast", "bg-danger", "text-white");
       toastElement.setAttribute("role", "alert");
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
-  
+
       toastElement.innerHTML = `
         <div class="toast-header">
           <img src="${this.picture}" class="rounded me-2" alt="Profile Picture" style="height: 30px; width: 30px;">
@@ -53,28 +54,20 @@ class StaffMember extends Employee {
           Staff member ${this.name} ${this.surname} is ${minutesLate} minute(s) late.
         </div>
       `;
-  
+
       // Append toast to container
       document.querySelector(".toast-container").appendChild(toastElement);
-  
+
       // Initialize and show toast
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
     }
   }
-}  
+}
 
 // Child 2
 class DeliveryDriver extends Employee {
-  constructor(
-    name,
-    surname,
-    vehicle,
-    telephone,
-    deliveryAddress,
-    returnTime,
-   
-  ) {
+  constructor(name, surname, vehicle, telephone, deliveryAddress, returnTime) {
     super(name, surname);
     this.vehicle = vehicle;
     this.telephone = telephone;
@@ -84,9 +77,12 @@ class DeliveryDriver extends Employee {
   deliveryDriverIsLate() {
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedDeliveryTime);
-  
-    if ((currentTime - expectedReturnTime) / (1000 * 60) > 1) { // Convert milliseconds to minutes
-      const minutesLate = Math.floor((currentTime - expectedReturnTime) / (1000 * 60)); // Calculate minutes late
+
+    if ((currentTime - expectedReturnTime) / (1000 * 60) > 1) {
+      // Convert milliseconds to minutes
+      const minutesLate = Math.floor(
+        (currentTime - expectedReturnTime) / (1000 * 60)
+      ); // Calculate minutes late
 
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-warning", "text-black");
@@ -114,48 +110,65 @@ class DeliveryDriver extends Employee {
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
     }
-}
+  }
 }
 
-// Class to manage staff table
+// Correct API call/s made on page load.
+// The API JSON String response should be converted into a JS object/s, then used to create relevant class objects.
+//Inheritance is used in object creation, using the data from the API call.
+// Staff table populated with the objects of the five (5) unique staff members.
+//(There must be a staffUserGet function that makes the API call(s) and processes the response(s), I.e., converts the API response(s) to the relevant JS class object(s)).
 class staffUserGet {
-  constructor(tableSelector) {
-    this.table = $(tableSelector); // Bind the table element
-    // Bind event listeners
-    this.bindRowClickEvent();
-    this.bindDocumentClickEvent();
+  constructor() {
+    this.selectedStaffMember = null; // Keep track of the selected staff member
+    this.staffMembers = []; // Store all staff members
   }
 
-  // Fetch and create employees
-  createEmployee() {
-    $.ajax({
-      url: "https://randomuser.me/api/?results=5",
-      dataType: "json",
-      success: (data) => {
-        const users = data.results;
+  async getUsers() {
+    try {
+      const response = await fetch("https://randomuser.me/api/?results=5");
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+      const data = await response.json();
+      this.staffMembers = this.createStaffMembers(data.results); // Save staff members
+      this.appendToTable(this.staffMembers); // Call function to append to table
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  }
 
-        // Create StaffMember objects and add rows
-        users.forEach((user) => {
-          const staffMember = new StaffMember(
-            user.name.first,
-            user.name.last,
-            user.picture.thumbnail,
-            user.email
-          );
-          this.addRow(staffMember); // Use class method
-        });
-      },
-      error: (error) => {
-        console.error("Error fetching users:", error);
-        alert("Failed to fetch staff data. Please try again later.");
-      },
+  createStaffMembers(users) {
+    return users.map((user) => {
+      const name = user.name.first;
+      const surname = user.name.last;
+      const picture = user.picture.thumbnail;
+      const email = user.email;
+      const status = "In";
+      const outTime = null;
+      const duration = null;
+      const expectedReturnTime = null;
+
+      return new StaffMember(
+        name,
+        surname,
+        picture,
+        email,
+        status,
+        outTime,
+        duration,
+        expectedReturnTime
+      );
     });
   }
 
-  // Add a staff member row to the table
-  addRow(staffMember) {
-    const row = `
-      <tr>
+  appendToTable(staffMembers) {
+    const tableBody = document.getElementById("staffTable");
+    tableBody.innerHTML = ""; // Clear existing rows
+    staffMembers.forEach((staffMember) => {
+      const row = document.createElement("tr");
+
+      row.innerHTML = `
         <td>
           <img
             src="${staffMember.picture}"
@@ -171,55 +184,224 @@ class staffUserGet {
         <td>${staffMember.outTime || ""}</td>
         <td>${staffMember.duration || ""}</td>
         <td>${staffMember.expectedReturnTime || ""}</td>
-      </tr>`;
-    this.table.append(row); // Append to the table
-  }
+      `;
 
-  // Method to handle row selection
-    bindRowClickEvent() {
-      this.table.on("click", "tr", (event) => {
-        const clickedRow = $(event.currentTarget);
-  
-        // Deselect the previous row
-        if (this.selectedStaffRow) {
-          this.selectedStaffRow.removeClass("bg-success");
-        }
-  
-        // Toggle selection if the same row is clicked
-        if (this.selectedStaffRow && this.selectedStaffRow[0] === clickedRow[0]) {
-          this.selectedStaffRow = null;
-        } else {
-          // Select the new row
-          this.selectedStaffRow = clickedRow;
-          this.selectedStaffRow.addClass("bg-success");
-        }
-      });
-    }
-  
-    // Method to deselect row when clicking outside the table
-    bindDocumentClickEvent() {
-      $(document).on("click", (e) => {
-        // If the clicked element is not part of the table, deselect the row
-        if (!this.table[0].contains(e.target)) {
-          if (this.selectedStaffRow) {
-            this.selectedStaffRow.removeClass("bg-success");
-            this.selectedStaffRow = null;
-          }
-        }
-      });
-    }
-  
+      // Set the data-staffMember attribute with the StaffMember object
+      $(row).data("staffMember", JSON.stringify(staffMember));
+
+      // Append the row to the table body
+      tableBody.appendChild(row);
+    });
+  }
 }
 
-// On page load, initialize and populate the table
-$(document).ready(() => {
-  const staffTableInstance = new staffUserGet("#staffTable");
-  staffTableInstance.createEmployee(); // Fetch and populate on page load
-});
+// Class to manage staff table row selection
+class StaffRowSelector {
+  constructor(tableSelector, staffManagerInstance) {
+    this.table = $(tableSelector); // Reference to the table
+    this.staffManager = staffManagerInstance; // Reference to staff manager instance
+    this.selectedRow = null; // Track the currently selected row
+    this.bindEvents(); // Initialize event bindings
+  }
+
+  bindEvents() {
+    // Row click event
+    this.table.on("click", "tr", (event) => this.handleRowClick(event));
+
+    // Document click event for deselection
+    $(document).on("click", (event) => this.handleOutsideClick(event));
+  }
+
+  handleRowClick(event) {
+    const clickedRow = $(event.currentTarget);
+
+    // Deselect the previously selected row
+    if (this.selectedRow) {
+      this.selectedRow.removeClass("bg-success");
+    }
+
+    // Toggle selection if the same row is clicked
+    if (this.selectedRow && this.selectedRow[0] === clickedRow[0]) {
+      this.selectedRow = null;
+      this.staffManager.selectedStaffMember = null;
+    } else {
+      // Select the new row
+      this.selectedRow = clickedRow;
+      this.selectedRow.addClass("bg-success");
+
+      // Debugging: Log the data attribute
+      console.log(
+        "Row data-staffMember:",
+        this.selectedRow.data("staffMember")
+      );
+
+      const staffMemberData = this.selectedRow.data("staffMember");
+      if (staffMemberData) {
+        this.staffManager.selectedStaffMember = JSON.parse(staffMemberData);
+      } else {
+        console.error("No data-staffMember found for the selected row.");
+      }
+    }
+  }
+
+  handleOutsideClick(event) {
+    if (!this.table[0].contains(event.target)) {
+      if (this.selectedRow) {
+        this.selectedRow.removeClass("bg-success");
+        this.selectedRow = null;
+        this.staffManager.selectedStaffMember = null;
+      }
+    }
+  }
+}
+
+//Clicking ‘Out’ prompts the user for data, updates the relevant staff member’s object, and then updates the Staff table from the object.
+//(There must be a staffOut function)
+// Modify the staffOut function to utilize the object method
+
+class staffOut {
+  constructor(rowSelector) {
+    this.rowSelector = rowSelector;
+  }
+
+  execute() {
+    const selectedStaffMember =
+      this.rowSelector.staffManager.selectedStaffMember;
+
+    if (!selectedStaffMember) {
+      alert("Please select a staff member first.");
+      return;
+    }
+
+    const minutesOut = prompt("How many minutes will the staff member be out?");
+    if (minutesOut === null) return; // User canceled the prompt
+
+    const parsedMinutes = parseInt(minutesOut, 10);
+    if (isNaN(parsedMinutes) || parsedMinutes <= 0) {
+      alert("Please enter a valid positive number for minutes.");
+      return;
+    }
+
+    const currentTime = new Date();
+    const expectedReturnTime = new Date(
+      currentTime.getTime() + parsedMinutes * 60000
+    );
+
+    // Calculate hours and minutes for the duration
+    const hours = Math.floor(parsedMinutes / 60);
+    const minutes = parsedMinutes % 60;
+    const formattedDuration = `${hours}h:${minutes
+      .toString()
+      .padStart(2, "0")}m`;
+
+    // Update staff member's object
+    selectedStaffMember.status = "Out";
+    selectedStaffMember.outTime = currentTime.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+    selectedStaffMember.duration = formattedDuration;
+    selectedStaffMember.expectedReturnTime =
+      expectedReturnTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+
+    // Update the selected row directly
+    const selectedRow = this.rowSelector.selectedRow;
+    if (selectedRow) {
+      selectedRow.html(`
+        <td>
+          <img
+            src="${selectedStaffMember.picture}"
+            alt="Profile Picture"
+            class="img-fluid rounded-circle"
+            style="width: 50px; height: 50px"
+          />
+        </td>
+        <td>${selectedStaffMember.name}</td>
+        <td>${selectedStaffMember.surname}</td>
+        <td>${selectedStaffMember.email}</td>
+        <td>${selectedStaffMember.status}</td>
+        <td>${selectedStaffMember.outTime || ""}</td>
+        <td>${selectedStaffMember.duration || ""}</td>
+        <td>${selectedStaffMember.expectedReturnTime || ""}</td>
+      `);
+
+      // Update the row's data attribute
+      selectedRow.data("staffMember", JSON.stringify(selectedStaffMember));
+    }
+  }
+}
+
+//Clicking ‘In’ updates the relevant staff member’s object and updates the Staff table from the object.
+//(There must be a staffIn function)
+class staffIn {
+  constructor(rowSelector) {
+    this.rowSelector = rowSelector;
+  }
+
+  execute() {
+    const selectedStaffMember =
+      this.rowSelector.staffManager.selectedStaffMember;
+
+    if (!selectedStaffMember) {
+      alert("Please select a staff member first.");
+      return;
+    }
+
+    // Update the status of the selected staff member
+    selectedStaffMember.status = "In";
+    selectedStaffMember.outTime = null;
+    selectedStaffMember.duration = null;
+    selectedStaffMember.expectedReturnTime = null;
+
+    // Update the selected row directly
+    const selectedRow = this.rowSelector.selectedRow;
+    if (selectedRow) {
+      // Update the row with the new status
+      $(selectedRow).html(`
+        <td>
+          <img
+            src="${selectedStaffMember.picture}"
+            alt="Profile Picture"
+            class="img-fluid rounded-circle"
+            style="width: 50px; height: 50px"
+          />
+        </td>
+        <td>${selectedStaffMember.name}</td>
+        <td>${selectedStaffMember.surname}</td>
+        <td>${selectedStaffMember.email}</td>
+        <td>${selectedStaffMember.status}</td>
+        <td>${selectedStaffMember.outTime || ""}</td>
+        <td>${selectedStaffMember.duration || ""}</td>
+        <td>${selectedStaffMember.expectedReturnTime || ""}</td>
+      `);
+
+      // Update the row's data attribute
+      $(selectedRow).data("staffMember", JSON.stringify(selectedStaffMember));
+    }
+  }
+}
 
 
-// Update the date and time dynamically
-function updateDateTime() {
+//Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
+//(There must be a staffMemberIsLate function)
+//
+//Delivery Driver information is manually entered into input elements in the Delivery Driver table. The table is populated with the Delivery Driver object data.
+//(There must be an addDelivery function that adds the delivery driver’s information to the Delivery Board table)
+//
+//Delivery Driver input is validated (Checked for correct format).
+//(There must be a validateDelivery function)
+//
+//Inheritance is used in the Delivery Driver object creation. Appropriate icons are used for Vehicle types, not images.
+//
+//Toast should be shown, with the correct information, when a delivery driver has not returned by the estimated return time.
+//(There must be a deliveryDriverIsLate function)
+
+// The current Date and Time should be updated every second (basically a digital clock) in the specified format (Day, Month, Year, Hour:Minute: Second”. E.g. 5 June 2022 14:54:22 or 05-06-2022 14:54:22
+//(There must be a digitalClock function)
+function digitalClock() {
   const options = {
     weekday: "long",
     year: "numeric",
@@ -239,5 +421,25 @@ function updateDateTime() {
   ).textContent = `${dateString}, ${timeString}`;
 }
 
-updateDateTime();
-setInterval(updateDateTime, 1000);
+digitalClock();
+setInterval(digitalClock, 1000);
+
+$(document).ready(() => {
+  const staffManager = new staffUserGet();
+  staffManager.getUsers();
+
+  // Initialize the row selector after the table is populated
+  const rowSelector = new StaffRowSelector("#staffTable", staffManager);
+
+  // Bind the "Out" button to the staffOut function
+  $("#out-button").on("click", () => {
+    const outHandler = new staffOut(rowSelector);
+    outHandler.execute();
+  });
+
+  // Bind the "In" button to the staffIn function
+  $("#in-button").on("click", () => {
+    const inHandler = new staffIn(rowSelector);
+    inHandler.execute();
+  });
+});
