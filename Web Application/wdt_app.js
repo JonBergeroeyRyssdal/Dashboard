@@ -28,9 +28,9 @@ class StaffMember extends Employee {
     this.duration = duration;
     this.expectedReturnTime = expectedReturnTime;
   }
-  
-//Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
-//(There must be a staffMemberIsLate function)
+
+  //Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
+  //(There must be a staffMemberIsLate function)
   staffMemberIsLate() {
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
@@ -78,7 +78,7 @@ class DeliveryDriver extends Employee {
     this.returnTime = returnTime;
   }
   //Toast should be shown, with the correct information, when a delivery driver has not returned by the estimated return time.
-//(There must be a deliveryDriverIsLate function)
+  //(There must be a deliveryDriverIsLate function)
   deliveryDriverIsLate() {
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedDeliveryTime);
@@ -389,23 +389,38 @@ class staffIn {
   }
 }
 
-
 //Delivery Driver information is manually entered into input elements in the Delivery Driver table. The table is populated with the Delivery Driver object data.
 //(There must be an addDelivery function that adds the delivery driver’s information to the Delivery Board table)
 
 class addDelivery {
   constructor() {
-    this.deliveryBoardTable = document.getElementById("deliveryBoard").querySelector("tbody"); // Reference to the delivery board table body
+    this.deliveryBoardTable = document
+      .getElementById("deliveryBoard")
+      .querySelector("tbody"); // Reference to the delivery board table body
   }
 
   createDeliveryDriver() {
     // Fetch form values from the Schedule Delivery HTML form
     const vehicle = document.querySelector("#scheduleDelivery select").value;
-    const name = document.querySelector("#scheduleDelivery input[placeholder='Enter name']").value.trim();
-    const surname = document.querySelector("#scheduleDelivery input[placeholder='Enter surname']").value.trim();
-    const phone = document.querySelector("#scheduleDelivery input[placeholder='Enter phone number']").value.trim();
-    const address = document.querySelector("#scheduleDelivery input[placeholder='Enter delivery address']").value.trim();
-    const returnTime = document.querySelector("#scheduleDelivery input[type='time']").value;
+    const name = document
+      .querySelector("#scheduleDelivery input[placeholder='Enter name']")
+      .value.trim();
+    const surname = document
+      .querySelector("#scheduleDelivery input[placeholder='Enter surname']")
+      .value.trim();
+    const phone = document
+      .querySelector(
+        "#scheduleDelivery input[placeholder='Enter phone number']"
+      )
+      .value.trim();
+    const address = document
+      .querySelector(
+        "#scheduleDelivery input[placeholder='Enter delivery address']"
+      )
+      .value.trim();
+    const returnTime = document.querySelector(
+      "#scheduleDelivery input[type='time']"
+    ).value;
 
     // Input validation
     if (!name || !surname || !phone || !address || !returnTime) {
@@ -414,23 +429,26 @@ class addDelivery {
     }
 
     // Create a new DeliveryDriver object
-    const newDriver = new DeliveryDriver(name, surname, vehicle, phone, address, returnTime);
+    const newDriver = new DeliveryDriver(
+      name,
+      surname,
+      vehicle,
+      phone,
+      address,
+      returnTime
+    );
 
     // Add a new row to the delivery board
     this.addRowToDeliveryBoard(newDriver);
   }
 
   addRowToDeliveryBoard(deliveryDriver) {
-    // Determine the vehicle icon
-    let vehicleIcon = "";
-    if (deliveryDriver.vehicle === "Car") {
-      vehicleIcon = `<i class="fas fa-car"></i>`; // Font Awesome car icon
-    } else if (deliveryDriver.vehicle === "Motorbike") {
-      vehicleIcon = `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
-    }
-
-    // Create a new row with the delivery driver information
+    let vehicleIcon = deliveryDriver.vehicle === "Car"
+      ? `<i class="fas fa-car"></i>` // Font Awesome car icon
+      : `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
+  
     const newRow = document.createElement("tr");
+  
     newRow.innerHTML = `
       <td class="text-center">${vehicleIcon}</td>
       <td class="text-center">${deliveryDriver.name}</td>
@@ -439,9 +457,70 @@ class addDelivery {
       <td class="text-center">${deliveryDriver.deliveryAddress}</td>
       <td class="text-center">${deliveryDriver.returnTime}</td>
     `;
-
+  
+    // Attach data-deliveryDriver to the row
+    $(newRow).data("deliveryDriver", JSON.stringify(deliveryDriver));
+  
     // Append the new row to the delivery board table
     this.deliveryBoardTable.appendChild(newRow);
+  }
+  
+}
+
+class DeliveryRowSelector {
+  constructor(tableSelector, deliveryManagerInstance) {
+    this.table = $(tableSelector); // Reference to the delivery table
+    this.deliveryManager = deliveryManagerInstance; // Reference to the delivery manager instance
+    this.selectedRow = null; // Track the currently selected row
+    this.bindEvents(); // Initialize event bindings
+  }
+
+  bindEvents() {
+    // Use event delegation to handle dynamically added rows
+    this.table.on("click", "tbody tr", (event) => this.handleRowClick(event));
+
+    // Document-wide click event to deselect rows
+    $(document).on("click", (event) => this.handleOutsideClick(event));
+  }
+
+  handleRowClick(event) {
+    event.stopPropagation(); // Prevent the document-level handler from triggering
+
+    const clickedRow = $(event.currentTarget);
+
+    // Toggle selection for the clicked row
+    if (this.selectedRow && this.selectedRow[0] === clickedRow[0]) {
+      // Deselect if the same row is clicked
+      this.selectedRow.removeClass("bg-success");
+      this.selectedRow = null;
+      this.deliveryManager.selectedDeliveryDriver = null;
+    } else {
+      // Deselect the previously selected row, if any
+      if (this.selectedRow) {
+        this.selectedRow.removeClass("bg-success");
+      }
+
+      // Select the new row
+      this.selectedRow = clickedRow;
+      this.selectedRow.addClass("bg-success");
+
+      // Store the delivery driver data
+      const deliveryDriverData = this.selectedRow.data("deliveryDriver");
+      if (deliveryDriverData) {
+        this.deliveryManager.selectedDeliveryDriver = JSON.parse(deliveryDriverData);
+      } else {
+        console.error("No data-deliveryDriver found for the selected row.");
+      }
+    }
+  }
+
+  handleOutsideClick(event) {
+    // Deselect the row if clicking anywhere on the page
+    if (this.selectedRow) {
+      this.selectedRow.removeClass("bg-success");
+      this.selectedRow = null;
+      this.deliveryManager.selectedDeliveryDriver = null;
+    }
   }
 }
 
@@ -498,4 +577,6 @@ $(document).ready(() => {
   $("#addDeliveryBtn").on("click", () => {
     deliveryHandler.createDeliveryDriver();
   });
+
+  const deliveryRowSelector = new DeliveryRowSelector("#deliveryBoard", deliveryHandler);
 });
