@@ -1,3 +1,6 @@
+
+
+
 // ----------Classes----------
 
 // Parent
@@ -305,7 +308,7 @@ class StaffRowSelector {
 
 class staffOut {
   constructor(rowSelector) {
-    this.rowSelector = rowSelector;
+    this.rowSelector = rowSelector; // Reference to the row selector
   }
 
   execute() {
@@ -338,7 +341,7 @@ class staffOut {
       .toString()
       .padStart(2, "0")}m`;
 
-    // Update staff member's object
+    // Update the staff member's object
     selectedStaffMember.status = "Out";
     selectedStaffMember.outTime = currentTime.toLocaleTimeString([], {
       hour: "2-digit",
@@ -351,7 +354,16 @@ class staffOut {
         minute: "2-digit",
       });
 
-    // Update the selected row directly
+    // Update the staffManager.staffMembers array to reflect changes
+    const staffIndex = this.rowSelector.staffManager.staffMembers.findIndex(
+      (staff) => staff.email === selectedStaffMember.email
+    );
+    if (staffIndex !== -1) {
+      this.rowSelector.staffManager.staffMembers[staffIndex] =
+        selectedStaffMember;
+    }
+
+    // Update the selected row in the table
     const selectedRow = this.rowSelector.selectedRow;
     if (selectedRow) {
       selectedRow.html(`
@@ -372,11 +384,16 @@ class staffOut {
         <td>${selectedStaffMember.expectedReturnTime || ""}</td>
       `);
 
-      // Update the row's data attribute
+      // Update the data attribute on the row
       selectedRow.data("staffMember", JSON.stringify(selectedStaffMember));
     }
+
+    // Log for debugging purposes
+    console.log("Updated staff member:", selectedStaffMember);
+    console.log("Updated staff list:", this.rowSelector.staffManager.staffMembers);
   }
 }
+
 
 //Clicking ‘In’ updates the relevant staff member’s object and updates the Staff table from the object.
 //(There must be a staffIn function)
@@ -664,5 +681,12 @@ $(document).ready(() => {
   // Check for late staff every minute
   setInterval(() => {
     staffManager.checkAllLateStaff();
-  }, 1000);
+  }, 60000);
+
+  $("#log-staff").on("click", () => {
+    console.log("Logging all staff members:");
+    staffManager.staffMembers.forEach((staffMember) => {
+      console.log(staffMember);
+    });
+  });
 });
