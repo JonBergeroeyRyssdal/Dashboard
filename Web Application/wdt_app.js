@@ -524,7 +524,32 @@ class DeliveryRowSelector {
   }
 }
 
+class clearDriver {
+  constructor(rowSelector) {
+    this.rowSelector = rowSelector; // Reference to the row selector
+  }
 
+  execute() {
+    const selectedRow = this.rowSelector.selectedRow;
+
+    if (!selectedRow) {
+      alert("Please select a driver to clear.");
+      return;
+    }
+
+    const confirmClear = confirm("Are you sure you want to clear the selected driver?");
+    if (confirmClear) {
+      // Remove the row from the table
+      selectedRow.remove();
+
+      // Clear the selected row and object from the row selector
+      this.rowSelector.selectedRow = null;
+      this.rowSelector.deliveryManager.selectedDeliveryDriver = null;
+
+      alert("The selected driver has been cleared.");
+    }
+  }
+}
 
 
 // The current Date and Time should be updated every second (basically a digital clock) in the specified format (Day, Month, Year, Hour:Minute: Second”. E.g. 5 June 2022 14:54:22 or 05-06-2022 14:54:22
@@ -579,4 +604,12 @@ $(document).ready(() => {
   });
 
   const deliveryRowSelector = new DeliveryRowSelector("#deliveryBoard", deliveryHandler);
+
+  // Initialize the clearDriver class
+  const clearHandler = new clearDriver(deliveryRowSelector);
+
+  // Bind the "Clear" button to the clearDriver functionality
+  $("#clear-button").on("click", () => {
+    clearHandler.execute();
+  });
 });
