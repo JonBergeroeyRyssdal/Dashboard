@@ -1,5 +1,3 @@
-
-
 // ----------Classes----------
 
 // Parent
@@ -12,9 +10,9 @@ class Employee {
 
 // Child 1
 
-  //Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
-  //(There must be a staffMemberIsLate function)
-  // StaffMember Class
+//Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
+//(There must be a staffMemberIsLate function)
+// StaffMember Class
 // Object to track notified and dismissed staff members
 const notifiedStaffMembers = {};
 
@@ -41,6 +39,14 @@ class StaffMember extends Employee {
 
   // Method to show a toast if the staff member is late
   staffMemberIsLate() {
+    // Ensure expectedReturnTime is valid
+    if (!this.expectedReturnTime) {
+      console.warn(
+        `No expected return time set for ${this.name} ${this.surname}`
+      );
+      return; // Exit if expectedReturnTime is not set
+    }
+
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
 
@@ -95,8 +101,6 @@ class StaffMember extends Employee {
     }
   }
 }
-
-
 
 // Child 2
 class DeliveryDriver extends Employee {
@@ -374,8 +378,6 @@ class staffOut {
   }
 }
 
-
-
 //Clicking ‘In’ updates the relevant staff member’s object and updates the Staff table from the object.
 //(There must be a staffIn function)
 class staffIn {
@@ -480,12 +482,13 @@ class addDelivery {
   }
 
   addRowToDeliveryBoard(deliveryDriver) {
-    let vehicleIcon = deliveryDriver.vehicle === "Car"
-      ? `<i class="fas fa-car"></i>` // Font Awesome car icon
-      : `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
-  
+    let vehicleIcon =
+      deliveryDriver.vehicle === "Car"
+        ? `<i class="fas fa-car"></i>` // Font Awesome car icon
+        : `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
+
     const newRow = document.createElement("tr");
-  
+
     newRow.innerHTML = `
       <td class="text-center">${vehicleIcon}</td>
       <td class="text-center">${deliveryDriver.name}</td>
@@ -494,14 +497,13 @@ class addDelivery {
       <td class="text-center">${deliveryDriver.deliveryAddress}</td>
       <td class="text-center">${deliveryDriver.returnTime}</td>
     `;
-  
+
     // Attach data-deliveryDriver to the row
     $(newRow).data("deliveryDriver", JSON.stringify(deliveryDriver));
-  
+
     // Append the new row to the delivery board table
     this.deliveryBoardTable.appendChild(newRow);
   }
-  
 }
 
 class DeliveryRowSelector {
@@ -544,7 +546,8 @@ class DeliveryRowSelector {
       // Store the delivery driver data
       const deliveryDriverData = this.selectedRow.data("deliveryDriver");
       if (deliveryDriverData) {
-        this.deliveryManager.selectedDeliveryDriver = JSON.parse(deliveryDriverData);
+        this.deliveryManager.selectedDeliveryDriver =
+          JSON.parse(deliveryDriverData);
       } else {
         console.error("No data-deliveryDriver found for the selected row.");
       }
@@ -574,7 +577,9 @@ class clearDriver {
       return;
     }
 
-    const confirmClear = confirm("Are you sure you want to clear the selected driver?");
+    const confirmClear = confirm(
+      "Are you sure you want to clear the selected driver?"
+    );
     if (confirmClear) {
       // Remove the row from the table
       selectedRow.remove();
@@ -587,8 +592,6 @@ class clearDriver {
     }
   }
 }
-
-
 
 // The current Date and Time should be updated every second (basically a digital clock) in the specified format (Day, Month, Year, Hour:Minute: Second”. E.g. 5 June 2022 14:54:22 or 05-06-2022 14:54:22
 //(There must be a digitalClock function)
@@ -618,9 +621,9 @@ setInterval(digitalClock, 1000);
 $(document).ready(() => {
   const staffManager = new staffUserGet();
   staffManager.getUsers();
- 
-   // Check for late staff every minute
-   setInterval(() => {
+
+  // Check for late staff every minute
+  setInterval(() => {
     staffManager.checkAllLateStaff();
   }, 60000);
 
@@ -646,7 +649,10 @@ $(document).ready(() => {
     deliveryHandler.createDeliveryDriver();
   });
 
-  const deliveryRowSelector = new DeliveryRowSelector("#deliveryBoard", deliveryHandler);
+  const deliveryRowSelector = new DeliveryRowSelector(
+    "#deliveryBoard",
+    deliveryHandler
+  );
 
   // Initialize the clearDriver class
   const clearHandler = new clearDriver(deliveryRowSelector);
