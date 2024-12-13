@@ -28,6 +28,9 @@ class StaffMember extends Employee {
     this.duration = duration;
     this.expectedReturnTime = expectedReturnTime;
   }
+  
+//Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
+//(There must be a staffMemberIsLate function)
   staffMemberIsLate() {
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
@@ -74,6 +77,8 @@ class DeliveryDriver extends Employee {
     this.deliveryAddress = deliveryAddress;
     this.returnTime = returnTime;
   }
+  //Toast should be shown, with the correct information, when a delivery driver has not returned by the estimated return time.
+//(There must be a deliveryDriverIsLate function)
   deliveryDriverIsLate() {
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedDeliveryTime);
@@ -385,19 +390,63 @@ class staffIn {
 }
 
 
-//Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
-//(There must be a staffMemberIsLate function)
-//
 //Delivery Driver information is manually entered into input elements in the Delivery Driver table. The table is populated with the Delivery Driver object data.
 //(There must be an addDelivery function that adds the delivery driver’s information to the Delivery Board table)
-//
-//Delivery Driver input is validated (Checked for correct format).
-//(There must be a validateDelivery function)
-//
-//Inheritance is used in the Delivery Driver object creation. Appropriate icons are used for Vehicle types, not images.
-//
-//Toast should be shown, with the correct information, when a delivery driver has not returned by the estimated return time.
-//(There must be a deliveryDriverIsLate function)
+
+class addDelivery {
+  constructor() {
+    this.deliveryBoardTable = document.getElementById("deliveryBoard").querySelector("tbody"); // Reference to the delivery board table body
+  }
+
+  createDeliveryDriver() {
+    // Fetch form values from the Schedule Delivery HTML form
+    const vehicle = document.querySelector("#scheduleDelivery select").value;
+    const name = document.querySelector("#scheduleDelivery input[placeholder='Enter name']").value.trim();
+    const surname = document.querySelector("#scheduleDelivery input[placeholder='Enter surname']").value.trim();
+    const phone = document.querySelector("#scheduleDelivery input[placeholder='Enter phone number']").value.trim();
+    const address = document.querySelector("#scheduleDelivery input[placeholder='Enter delivery address']").value.trim();
+    const returnTime = document.querySelector("#scheduleDelivery input[type='time']").value;
+
+    // Input validation
+    if (!name || !surname || !phone || !address || !returnTime) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    // Create a new DeliveryDriver object
+    const newDriver = new DeliveryDriver(name, surname, vehicle, phone, address, returnTime);
+
+    // Add a new row to the delivery board
+    this.addRowToDeliveryBoard(newDriver);
+  }
+
+  addRowToDeliveryBoard(deliveryDriver) {
+    // Determine the vehicle icon
+    let vehicleIcon = "";
+    if (deliveryDriver.vehicle === "Car") {
+      vehicleIcon = `<i class="fas fa-car"></i>`; // Font Awesome car icon
+    } else if (deliveryDriver.vehicle === "Motorbike") {
+      vehicleIcon = `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
+    }
+
+    // Create a new row with the delivery driver information
+    const newRow = document.createElement("tr");
+    newRow.innerHTML = `
+      <td class="text-center">${vehicleIcon}</td>
+      <td class="text-center">${deliveryDriver.name}</td>
+      <td class="text-center">${deliveryDriver.surname}</td>
+      <td class="text-center">${deliveryDriver.telephone}</td>
+      <td class="text-center">${deliveryDriver.deliveryAddress}</td>
+      <td class="text-center">${deliveryDriver.returnTime}</td>
+    `;
+
+    // Append the new row to the delivery board table
+    this.deliveryBoardTable.appendChild(newRow);
+  }
+}
+
+
+
 
 // The current Date and Time should be updated every second (basically a digital clock) in the specified format (Day, Month, Year, Hour:Minute: Second”. E.g. 5 June 2022 14:54:22 or 05-06-2022 14:54:22
 //(There must be a digitalClock function)
@@ -441,5 +490,12 @@ $(document).ready(() => {
   $("#in-button").on("click", () => {
     const inHandler = new staffIn(rowSelector);
     inHandler.execute();
+  });
+
+  const deliveryHandler = new addDelivery();
+
+  // Bind the "Add" button click event to create a delivery driver
+  $("#addDeliveryBtn").on("click", () => {
+    deliveryHandler.createDeliveryDriver();
   });
 });
