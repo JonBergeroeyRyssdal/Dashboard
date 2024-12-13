@@ -1,3 +1,5 @@
+
+
 // ----------Classes----------
 
 // Parent
@@ -9,6 +11,14 @@ class Employee {
 }
 
 // Child 1
+
+  //Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
+  //(There must be a staffMemberIsLate function)
+  // StaffMember Class
+// Object to track notified and dismissed staff members
+const notifiedStaffMembers = {};
+
+// StaffMember Class
 class StaffMember extends Employee {
   constructor(
     name,
@@ -29,23 +39,36 @@ class StaffMember extends Employee {
     this.expectedReturnTime = expectedReturnTime;
   }
 
-  //Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
-  //(There must be a staffMemberIsLate function)
+  // Method to show a toast if the staff member is late
   staffMemberIsLate() {
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
 
-    if ((currentTime - expectedReturnTime) / (1000 * 60) > 1) {
-      // Convert milliseconds to minutes
+    // Initialize the status object for this staff member
+    if (!notifiedStaffMembers[this.email]) {
+      notifiedStaffMembers[this.email] = { notified: false, dismissed: false };
+    }
+
+    // Check if the staff member is late and has not been notified or dismissed
+    const staffStatus = notifiedStaffMembers[this.email];
+    if (
+      (currentTime - expectedReturnTime) / (1000 * 60) > 1 && // More than 1 minute late
+      !staffStatus.notified && // Not already notified
+      !staffStatus.dismissed // Not dismissed manually
+    ) {
+      staffStatus.notified = true; // Mark as notified
+
       const minutesLate = Math.floor(
         (currentTime - expectedReturnTime) / (1000 * 60)
       ); // Calculate minutes late
-      const toastElement = document.createElement("div");
 
+      // Create the toast element
+      const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-danger", "text-white");
       toastElement.setAttribute("role", "alert");
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
+      toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
 
       toastElement.innerHTML = `
         <div class="toast-header">
@@ -58,15 +81,22 @@ class StaffMember extends Employee {
         </div>
       `;
 
-      // Append toast to container
+      // Append toast to the container
       document.querySelector(".toast-container").appendChild(toastElement);
 
-      // Initialize and show toast
+      // Show the toast using Bootstrap
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
+
+      // Mark as dismissed if the user closes the toast
+      toastElement.addEventListener("hidden.bs.toast", () => {
+        staffStatus.dismissed = true; // Mark as dismissed
+      });
     }
   }
 }
+
+
 
 // Child 2
 class DeliveryDriver extends Employee {
@@ -196,6 +226,11 @@ class staffUserGet {
 
       // Append the row to the table body
       tableBody.appendChild(row);
+    });
+  }
+  checkAllLateStaff() {
+    this.staffMembers.forEach((staffMember) => {
+      staffMember.staffMemberIsLate(); // Call the method for each staff member
     });
   }
 }
@@ -338,6 +373,8 @@ class staffOut {
     }
   }
 }
+
+
 
 //Clicking ‘In’ updates the relevant staff member’s object and updates the Staff table from the object.
 //(There must be a staffIn function)
@@ -552,6 +589,7 @@ class clearDriver {
 }
 
 
+
 // The current Date and Time should be updated every second (basically a digital clock) in the specified format (Day, Month, Year, Hour:Minute: Second”. E.g. 5 June 2022 14:54:22 or 05-06-2022 14:54:22
 //(There must be a digitalClock function)
 function digitalClock() {
@@ -580,6 +618,11 @@ setInterval(digitalClock, 1000);
 $(document).ready(() => {
   const staffManager = new staffUserGet();
   staffManager.getUsers();
+ 
+   // Check for late staff every minute
+   setInterval(() => {
+    staffManager.checkAllLateStaff();
+  }, 60000);
 
   // Initialize the row selector after the table is populated
   const rowSelector = new StaffRowSelector("#staffTable", staffManager);
@@ -612,4 +655,8 @@ $(document).ready(() => {
   $("#clear-button").on("click", () => {
     clearHandler.execute();
   });
+  // Check for late staff every minute
+  setInterval(() => {
+    staffManager.checkAllLateStaff();
+  }, 1000);
 });
