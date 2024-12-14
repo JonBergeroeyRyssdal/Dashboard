@@ -118,7 +118,6 @@ class DeliveryDriver extends Employee {
   //Toast should be shown, with the correct information, when a delivery driver has not returned by the estimated return time.
   //(There must be a deliveryDriverIsLate function)
   deliveryDriverIsLate() {
-    // Ensure returnTime is valid
     if (!this.returnTime) {
       console.warn(`No return time set for ${this.name} ${this.surname}`);
       return;
@@ -126,72 +125,64 @@ class DeliveryDriver extends Employee {
   
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.returnTime);
-    const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60); // Time difference in minutes
+    const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60);
   
-    // Log key variables for debugging
     console.log(`Driver: ${this.name} ${this.surname}`);
     console.log(`Current Time: ${currentTime}`);
     console.log(`Expected Return Time: ${expectedReturnTime}`);
     console.log(`Time Difference (in minutes): ${timeDifference}`);
   
-    // Ensure the notification is not repeated
     if (!notifiedDeliveryDrivers[this.telephone]) {
       notifiedDeliveryDrivers[this.telephone] = {
         notified: false,
         dismissed: false,
+        toastElement: null, // Store a reference to the toast element
       };
     }
   
     const driverStatus = notifiedDeliveryDrivers[this.telephone];
+  
     if (
       timeDifference > 1 &&
       !driverStatus.notified &&
       !driverStatus.dismissed
     ) {
-      driverStatus.notified = true; // Mark as notified
+      driverStatus.notified = true;
   
-      const minutesLate = Math.floor(timeDifference);
-  
-      // Format the expected return time to hh:mm
       const formattedReturnTime = expectedReturnTime.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
-        hour12: false, // 24-hour format
+        hour12: false,
       });
   
-      // Determine the vehicle icon
       const vehicleIcon =
         this.vehicle === "Car"
-          ? `<i class="fas fa-car"></i>` // Font Awesome car icon
-          : `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorcycle icon
+          ? `<i class="fas fa-car"></i>`
+          : `<i class="fas fa-motorcycle"></i>`;
   
-      console.log(
-        `Driver ${this.name} is ${minutesLate} minutes late. Showing toast.`
-      );
-  
-      // Create the toast element
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-warning", "text-black");
       toastElement.setAttribute("role", "alert");
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
-      toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
+      toastElement.setAttribute("data-bs-autohide", "false");
   
       toastElement.innerHTML = `
         <div class="toast-header">
-          <span class="me-2">${vehicleIcon}</span> <!-- Add vehicle icon here -->
+          <span class="me-2">${vehicleIcon}</span>
           <strong class="me-auto">${this.name} ${this.surname}</strong>
           <button type="button" class="btn-close btn-close-black" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-          Delivery driver ${this.name} ${this.surname} is ${minutesLate} minute(s) late.<br>
+          Delivery driver ${this.name} ${this.surname} is <span class="minutes-late">${Math.floor(
+            timeDifference
+          )}</span> minute(s) late.<br>
           <strong>Phone:</strong> ${this.telephone}<br>
           <strong>Address:</strong> ${this.deliveryAddress}<br>
           <strong>Estimated Return Time:</strong> ${formattedReturnTime}
         </div>
       `;
   
-      // Append toast to the container
       const toastContainer = document.querySelector(".toast-container");
       if (!toastContainer) {
         console.error("Toast container not found.");
@@ -199,16 +190,31 @@ class DeliveryDriver extends Employee {
       }
       toastContainer.appendChild(toastElement);
   
-      // Show the toast using Bootstrap
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
   
-      // Mark as dismissed if the user closes the toast
+      // Store the toast element for updates
+      driverStatus.toastElement = toastElement;
+  
+      // Mark as dismissed when the user closes the toast
       toastElement.addEventListener("hidden.bs.toast", () => {
-        driverStatus.dismissed = true; // Mark as dismissed
+        driverStatus.dismissed = true;
       });
+  
+      // Start updating the "minutes late" dynamically
+      setInterval(() => {
+        const currentTime = new Date();
+        const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60);
+        const minutesLate = Math.floor(timeDifference);
+  
+        const minutesLateElement = toastElement.querySelector(".minutes-late");
+        if (minutesLateElement) {
+          minutesLateElement.textContent = minutesLate; // Update the text dynamically
+        }
+      }, 60000); // Update every minute
     }
   }
+  
   
   
 }
