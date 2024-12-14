@@ -35,17 +35,13 @@ class StaffMember extends Employee {
   staffMemberIsLate() {
     // Ensure expectedReturnTime is valid
     if (!this.expectedReturnTime) {
-      //  console.warn(
-      //    `No expected return time set for ${this.name} ${this.surname}`
-      //  );
       return;
     }
-
+  
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
     const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60); // Time difference in minutes
-
-    // Debug logs
+  
     console.log(`${this.name} ${this.surname}: Current Time: ${currentTime}`);
     console.log(
       `${this.name} ${this.surname}: Expected Return Time: ${expectedReturnTime}`
@@ -53,26 +49,26 @@ class StaffMember extends Employee {
     console.log(
       `${this.name} ${this.surname}: Time Difference: ${timeDifference} minutes`
     );
-
+  
     // Ensure the notification is not repeated
     if (!notifiedStaffMembers[this.email]) {
-      notifiedStaffMembers[this.email] = { notified: false, dismissed: false };
+      notifiedStaffMembers[this.email] = { notified: false, dismissed: false, toastElement: null };
     }
-
+  
     const staffStatus = notifiedStaffMembers[this.email];
+  
     if (timeDifference > 1 && !staffStatus.notified && !staffStatus.dismissed) {
       staffStatus.notified = true; // Mark as notified
-
+  
       const minutesLate = Math.floor(timeDifference);
-
-      // Create the toast element
+  
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-danger", "text-white");
       toastElement.setAttribute("role", "alert");
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
       toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
-
+  
       toastElement.innerHTML = `
         <div class="toast-header">
           <img src="${this.picture}" class="rounded me-2" alt="Profile Picture" style="height: 50px; width: 50px;">
@@ -80,28 +76,42 @@ class StaffMember extends Employee {
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-          Staff member ${this.name} ${this.surname} is ${minutesLate} minute(s) late.
+          Staff member ${this.name} ${this.surname} is <span class="minutes-late">${minutesLate}</span> minute(s) late.
         </div>
       `;
-
-      // Append toast to the container
+  
       const toastContainer = document.querySelector(".toast-container");
       if (!toastContainer) {
         console.error("Toast container not found.");
         return;
       }
       toastContainer.appendChild(toastElement);
-
-      // Show the toast using Bootstrap
+  
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
-
+  
+      // Store the toast element for updates
+      staffStatus.toastElement = toastElement;
+  
       // Mark as dismissed if the user closes the toast
       toastElement.addEventListener("hidden.bs.toast", () => {
-        staffStatus.dismissed = true; // Mark as dismissed
+        staffStatus.dismissed = true;
       });
+  
+      // Update the "minutes late" dynamically
+      setInterval(() => {
+        const currentTime = new Date();
+        const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60);
+        const updatedMinutesLate = Math.floor(timeDifference);
+  
+        const minutesLateElement = toastElement.querySelector(".minutes-late");
+        if (minutesLateElement) {
+          minutesLateElement.textContent = updatedMinutesLate; // Update the text dynamically
+        }
+      }, 60000); // Update every minute
     }
   }
+  
 }
 
 // Object to track notified and dismissed delivery drivers
