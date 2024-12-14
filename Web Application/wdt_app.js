@@ -1,5 +1,3 @@
-// ----------Classes----------
-
 // Parent
 class Employee {
   constructor(name, surname) {
@@ -7,9 +5,6 @@ class Employee {
     this.surname = surname;
   }
 }
-
-// Child 1
-
 
 // StaffMember Class
 // Object to track notified and dismissed staff members
@@ -40,30 +35,36 @@ class StaffMember extends Employee {
   staffMemberIsLate() {
     // Ensure expectedReturnTime is valid
     if (!this.expectedReturnTime) {
-      console.warn(`No expected return time set for ${this.name} ${this.surname}`);
+      //  console.warn(
+      //    `No expected return time set for ${this.name} ${this.surname}`
+      //  );
       return;
     }
-  
+
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
     const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60); // Time difference in minutes
-  
+
     // Debug logs
     console.log(`${this.name} ${this.surname}: Current Time: ${currentTime}`);
-    console.log(`${this.name} ${this.surname}: Expected Return Time: ${expectedReturnTime}`);
-    console.log(`${this.name} ${this.surname}: Time Difference: ${timeDifference} minutes`);
-  
+    console.log(
+      `${this.name} ${this.surname}: Expected Return Time: ${expectedReturnTime}`
+    );
+    console.log(
+      `${this.name} ${this.surname}: Time Difference: ${timeDifference} minutes`
+    );
+
     // Ensure the notification is not repeated
     if (!notifiedStaffMembers[this.email]) {
       notifiedStaffMembers[this.email] = { notified: false, dismissed: false };
     }
-  
+
     const staffStatus = notifiedStaffMembers[this.email];
     if (timeDifference > 1 && !staffStatus.notified && !staffStatus.dismissed) {
       staffStatus.notified = true; // Mark as notified
-  
+
       const minutesLate = Math.floor(timeDifference);
-  
+
       // Create the toast element
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-danger", "text-white");
@@ -71,7 +72,7 @@ class StaffMember extends Employee {
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
       toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
-  
+
       toastElement.innerHTML = `
         <div class="toast-header">
           <img src="${this.picture}" class="rounded me-2" alt="Profile Picture" style="height: 50px; width: 50px;">
@@ -82,7 +83,7 @@ class StaffMember extends Employee {
           Staff member ${this.name} ${this.surname} is ${minutesLate} minute(s) late.
         </div>
       `;
-  
+
       // Append toast to the container
       const toastContainer = document.querySelector(".toast-container");
       if (!toastContainer) {
@@ -90,11 +91,11 @@ class StaffMember extends Employee {
         return;
       }
       toastContainer.appendChild(toastElement);
-  
+
       // Show the toast using Bootstrap
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
-  
+
       // Mark as dismissed if the user closes the toast
       toastElement.addEventListener("hidden.bs.toast", () => {
         staffStatus.dismissed = true; // Mark as dismissed
@@ -103,7 +104,9 @@ class StaffMember extends Employee {
   }
 }
 
-// Child 2
+// Object to track notified and dismissed delivery drivers
+const notifiedDeliveryDrivers = {};
+
 class DeliveryDriver extends Employee {
   constructor(name, surname, vehicle, telephone, deliveryAddress, returnTime) {
     super(name, surname);
@@ -115,25 +118,56 @@ class DeliveryDriver extends Employee {
   //Toast should be shown, with the correct information, when a delivery driver has not returned by the estimated return time.
   //(There must be a deliveryDriverIsLate function)
   deliveryDriverIsLate() {
+    // Ensure returnTime is valid
+    if (!this.returnTime) {
+      console.warn(`No return time set for ${this.name} ${this.surname}`);
+      return;
+    }
+
     const currentTime = new Date();
-    const expectedReturnTime = new Date(this.expectedDeliveryTime);
+    const expectedReturnTime = new Date(this.returnTime);
+    const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60); // Time difference in minutes
 
-    if ((currentTime - expectedReturnTime) / (1000 * 60) > 1) {
-      // Convert milliseconds to minutes
-      const minutesLate = Math.floor(
-        (currentTime - expectedReturnTime) / (1000 * 60)
-      ); // Calculate minutes late
+    // Log key variables for debugging
+    console.log(`Driver: ${this.name} ${this.surname}`);
+    console.log(`Current Time: ${currentTime}`);
+    console.log(`Expected Return Time: ${expectedReturnTime}`);
+    console.log(`Time Difference (in minutes): ${timeDifference}`);
 
+    // Ensure the notification is not repeated
+    if (!notifiedDeliveryDrivers[this.telephone]) {
+      notifiedDeliveryDrivers[this.telephone] = {
+        notified: false,
+        dismissed: false,
+      };
+    }
+
+    const driverStatus = notifiedDeliveryDrivers[this.telephone];
+    if (
+      timeDifference > 1 &&
+      !driverStatus.notified &&
+      !driverStatus.dismissed
+    ) {
+      driverStatus.notified = true; // Mark as notified
+
+      const minutesLate = Math.floor(timeDifference);
+
+      console.log(
+        `Driver ${this.name} is ${minutesLate} minutes late. Showing toast.`
+      );
+
+      // Create the toast element
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-warning", "text-black");
       toastElement.setAttribute("role", "alert");
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
+      toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
 
       toastElement.innerHTML = `
         <div class="toast-header">
-          <strong class="me-auto">${this.vehicle}&nbsp${this.name} ${this.surname}</strong>
-          <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+          <strong class="me-auto">${this.vehicle} ${this.name} ${this.surname}</strong>
+          <button type="button" class="btn-close btn-close-black" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
           Delivery driver ${this.name} ${this.surname} is ${minutesLate} minute(s) late.<br>
@@ -143,12 +177,22 @@ class DeliveryDriver extends Employee {
         </div>
       `;
 
-      // Append the toast to the toast container
-      document.querySelector(".toast-container").appendChild(toastElement);
+      // Append toast to the container
+      const toastContainer = document.querySelector(".toast-container");
+      if (!toastContainer) {
+        console.error("Toast container not found.");
+        return;
+      }
+      toastContainer.appendChild(toastElement);
 
-      // Initialize and show the toast using Bootstrap
+      // Show the toast using Bootstrap
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
+
+      // Mark as dismissed if the user closes the toast
+      toastElement.addEventListener("hidden.bs.toast", () => {
+        driverStatus.dismissed = true; // Mark as dismissed
+      });
     }
   }
 }
@@ -174,12 +218,6 @@ class staffUserGet {
 
       // Populate the staffMembers array with properly instantiated objects
       this.staffMembers = this.createStaffMembers(data.results);
-
-      // Debugging: Log the staff members array and check instance types
-      console.log("Staff Members Array:", this.staffMembers);
-      this.staffMembers.forEach((staffMember) => {
-        console.log(staffMember instanceof StaffMember, staffMember); // Should log "true" for all entries
-      });
 
       // Populate the table with staff members
       this.appendToTable(this.staffMembers);
@@ -220,9 +258,9 @@ class staffUserGet {
             minute: "2-digit",
           })
         : "";
-  
+
       const row = document.createElement("tr");
-  
+
       row.innerHTML = `
         <td>
           <img
@@ -240,30 +278,30 @@ class staffUserGet {
         <td>${staffMember.duration || ""}</td>
         <td>${formattedExpectedReturnTime}</td>
       `;
-  
+
       // Store the StaffMember object directly in the row's data
       $(row).data("staffMember", staffMember);
-  
+
       // Append the row to the table body
       tableBody.appendChild(row);
     });
   }
-  
-  
 
   checkAllLateStaff() {
-    console.log("Checking for late staff members...");
-  
+    // console.log("Checking for late staff members...");
+
     this.staffMembers.forEach((staffMember) => {
-      console.log(`Checking ${staffMember.name} ${staffMember.surname}...`);
+      //   console.log(`Checking ${staffMember.name} ${staffMember.surname}...`);
       if (staffMember instanceof StaffMember) {
         staffMember.staffMemberIsLate();
       } else {
-        console.error("staffMember is not an instance of StaffMember:", staffMember);
+        console.error(
+          "staffMember is not an instance of StaffMember:",
+          staffMember
+        );
       }
     });
   }
-  
 }
 
 // Class to manage staff table row selection
@@ -484,37 +522,45 @@ class addDelivery {
     this.deliveryBoardTable = document
       .getElementById("deliveryBoard")
       .querySelector("tbody"); // Reference to the delivery board table body
+    this.deliveryDrivers = [];
   }
 
   createDeliveryDriver() {
-    // Fetch form values from the Schedule Delivery HTML form
+    // Fetch form values
     const vehicle = document.querySelector("#scheduleDelivery select").value;
-    const name = document
-      .querySelector("#scheduleDelivery input[placeholder='Enter name']")
-      .value.trim();
-    const surname = document
-      .querySelector("#scheduleDelivery input[placeholder='Enter surname']")
-      .value.trim();
-    const phone = document
-      .querySelector(
-        "#scheduleDelivery input[placeholder='Enter phone number']"
-      )
-      .value.trim();
-    const address = document
-      .querySelector(
-        "#scheduleDelivery input[placeholder='Enter delivery address']"
-      )
-      .value.trim();
-    const returnTime = document.querySelector(
-      "#scheduleDelivery input[type='time']"
-    ).value;
-
+    const name = document.querySelector("#scheduleDelivery input[placeholder='Enter name']").value.trim();
+    const surname = document.querySelector("#scheduleDelivery input[placeholder='Enter surname']").value.trim();
+    const phone = document.querySelector("#scheduleDelivery input[placeholder='Enter phone number']").value.trim();
+    const address = document.querySelector("#scheduleDelivery input[placeholder='Enter delivery address']").value.trim();
+    const returnTime = document.querySelector("#scheduleDelivery input[type='time']").value;
+  
+    // Log the returnTime for debugging
+    console.log(`Return Time Entered: ${returnTime}`);
+  
     // Input validation
     if (!name || !surname || !phone || !address || !returnTime) {
       alert("Please fill in all fields.");
       return;
     }
-
+  
+    // Combine current date with returnTime
+    const currentDate = new Date(); // Get the current date
+    const [hours, minutes] = returnTime.split(":"); // Split returnTime into hours and minutes
+    const combinedReturnTime = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth(),
+      currentDate.getDate(),
+      parseInt(hours),
+      parseInt(minutes),
+      0
+    );
+  
+    if (isNaN(combinedReturnTime)) {
+      console.error("Invalid combined return time.");
+      alert("Please enter a valid return time.");
+      return;
+    }
+  
     // Create a new DeliveryDriver object
     const newDriver = new DeliveryDriver(
       name,
@@ -522,12 +568,22 @@ class addDelivery {
       vehicle,
       phone,
       address,
-      returnTime
+      combinedReturnTime.toISOString() // Store in ISO format
     );
-
+  
+    // Log the created driver for debugging
+    console.log("Created Delivery Driver:", newDriver);
+  
+    // Add the new driver to the array
+    this.deliveryDrivers.push(newDriver);
+  
     // Add a new row to the delivery board
     this.addRowToDeliveryBoard(newDriver);
+  
+    // Check if the new driver is late
+    newDriver.deliveryDriverIsLate();
   }
+  
 
   addRowToDeliveryBoard(deliveryDriver) {
     let vehicleIcon =
@@ -713,4 +769,18 @@ $(document).ready(() => {
   setInterval(() => {
     staffManager.checkAllLateStaff();
   }, 10000);
+
+  // Periodically check for late delivery drivers
+  setInterval(() => {
+    if (
+      deliveryHandler.deliveryDrivers &&
+      deliveryHandler.deliveryDrivers.length > 0
+    ) {
+      deliveryHandler.deliveryDrivers.forEach((driver) => {
+        driver.deliveryDriverIsLate(); // Check each driver's lateness
+      });
+    } else {
+      console.log("No delivery drivers to check.");
+    }
+  }, 10000); // Check every minute
 });
