@@ -1,6 +1,3 @@
-
-
-
 // ----------Classes----------
 
 // Parent
@@ -40,37 +37,33 @@ class StaffMember extends Employee {
     this.expectedReturnTime = expectedReturnTime;
   }
 
-  // Method to show a toast if the staff member is late
   staffMemberIsLate() {
     // Ensure expectedReturnTime is valid
     if (!this.expectedReturnTime) {
-      console.warn(
-        `No expected return time set for ${this.name} ${this.surname}`
-      );
-      return; // Exit if expectedReturnTime is not set
+      console.warn(`No expected return time set for ${this.name} ${this.surname}`);
+      return;
     }
-
+  
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
-
-    // Initialize the status object for this staff member
+    const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60); // Time difference in minutes
+  
+    // Debug logs
+    console.log(`${this.name} ${this.surname}: Current Time: ${currentTime}`);
+    console.log(`${this.name} ${this.surname}: Expected Return Time: ${expectedReturnTime}`);
+    console.log(`${this.name} ${this.surname}: Time Difference: ${timeDifference} minutes`);
+  
+    // Ensure the notification is not repeated
     if (!notifiedStaffMembers[this.email]) {
       notifiedStaffMembers[this.email] = { notified: false, dismissed: false };
     }
-
-    // Check if the staff member is late and has not been notified or dismissed
+  
     const staffStatus = notifiedStaffMembers[this.email];
-    if (
-      (currentTime - expectedReturnTime) / (1000 * 60) > 1 && // More than 1 minute late
-      !staffStatus.notified && // Not already notified
-      !staffStatus.dismissed // Not dismissed manually
-    ) {
+    if (timeDifference > 1 && !staffStatus.notified && !staffStatus.dismissed) {
       staffStatus.notified = true; // Mark as notified
-
-      const minutesLate = Math.floor(
-        (currentTime - expectedReturnTime) / (1000 * 60)
-      ); // Calculate minutes late
-
+  
+      const minutesLate = Math.floor(timeDifference);
+  
       // Create the toast element
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-danger", "text-white");
@@ -78,7 +71,7 @@ class StaffMember extends Employee {
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
       toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
-
+  
       toastElement.innerHTML = `
         <div class="toast-header">
           <img src="${this.picture}" class="rounded me-2" alt="Profile Picture" style="height: 30px; width: 30px;">
@@ -89,20 +82,26 @@ class StaffMember extends Employee {
           Staff member ${this.name} ${this.surname} is ${minutesLate} minute(s) late.
         </div>
       `;
-
+  
       // Append toast to the container
-      document.querySelector(".toast-container").appendChild(toastElement);
-
+      const toastContainer = document.querySelector(".toast-container");
+      if (!toastContainer) {
+        console.error("Toast container not found.");
+        return;
+      }
+      toastContainer.appendChild(toastElement);
+  
       // Show the toast using Bootstrap
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
-
+  
       // Mark as dismissed if the user closes the toast
       toastElement.addEventListener("hidden.bs.toast", () => {
         staffStatus.dismissed = true; // Mark as dismissed
       });
     }
   }
+  
 }
 
 // Child 2
@@ -173,8 +172,18 @@ class staffUserGet {
         throw new Error("Network response was not ok");
       }
       const data = await response.json();
-      this.staffMembers = this.createStaffMembers(data.results); // Save staff members
-      this.appendToTable(this.staffMembers); // Call function to append to table
+
+      // Populate the staffMembers array with properly instantiated objects
+      this.staffMembers = this.createStaffMembers(data.results);
+
+      // Debugging: Log the staff members array and check instance types
+      console.log("Staff Members Array:", this.staffMembers);
+      this.staffMembers.forEach((staffMember) => {
+        console.log(staffMember instanceof StaffMember, staffMember); // Should log "true" for all entries
+      });
+
+      // Populate the table with staff members
+      this.appendToTable(this.staffMembers);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -186,20 +195,17 @@ class staffUserGet {
       const surname = user.name.last;
       const picture = user.picture.thumbnail;
       const email = user.email;
-      const status = "In";
-      const outTime = null;
-      const duration = null;
-      const expectedReturnTime = null;
 
+      // Create and return a new StaffMember instance
       return new StaffMember(
         name,
         surname,
         picture,
         email,
-        status,
-        outTime,
-        duration,
-        expectedReturnTime
+        "In", // Default status
+        null, // Default outTime
+        null, // Default duration
+        null // Default expectedReturnTime
       );
     });
   }
@@ -228,18 +234,27 @@ class staffUserGet {
         <td>${staffMember.expectedReturnTime || ""}</td>
       `;
 
-      // Set the data-staffMember attribute with the StaffMember object
-      $(row).data("staffMember", JSON.stringify(staffMember));
+      // Store the StaffMember object directly in the row's data
+      $(row).data("staffMember", staffMember);
 
       // Append the row to the table body
       tableBody.appendChild(row);
     });
   }
+
   checkAllLateStaff() {
+    console.log("Checking for late staff members...");
+  
     this.staffMembers.forEach((staffMember) => {
-      staffMember.staffMemberIsLate(); // Call the method for each staff member
+      console.log(`Checking ${staffMember.name} ${staffMember.surname}...`);
+      if (staffMember instanceof StaffMember) {
+        staffMember.staffMemberIsLate();
+      } else {
+        console.error("staffMember is not an instance of StaffMember:", staffMember);
+      }
     });
   }
+  
 }
 
 // Class to manage staff table row selection
@@ -276,15 +291,9 @@ class StaffRowSelector {
       this.selectedRow = clickedRow;
       this.selectedRow.addClass("bg-success");
 
-      // Debugging: Log the data attribute
-      console.log(
-        "Row data-staffMember:",
-        this.selectedRow.data("staffMember")
-      );
-
       const staffMemberData = this.selectedRow.data("staffMember");
       if (staffMemberData) {
-        this.staffManager.selectedStaffMember = JSON.parse(staffMemberData);
+        this.staffManager.selectedStaffMember = staffMemberData; // Use the stored object
       } else {
         console.error("No data-staffMember found for the selected row.");
       }
@@ -341,6 +350,9 @@ class staffOut {
       .toString()
       .padStart(2, "0")}m`;
 
+    // Log before the update
+    console.log("Before update:", selectedStaffMember);
+
     // Update the staff member's object
     selectedStaffMember.status = "Out";
     selectedStaffMember.outTime = currentTime.toLocaleTimeString([], {
@@ -348,20 +360,26 @@ class staffOut {
       minute: "2-digit",
     });
     selectedStaffMember.duration = formattedDuration;
-    selectedStaffMember.expectedReturnTime =
-      expectedReturnTime.toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
+    selectedStaffMember.expectedReturnTime = expectedReturnTime.toISOString();
+
+    // Log after the update
+    console.log("After update:", selectedStaffMember);
 
     // Update the staffManager.staffMembers array to reflect changes
     const staffIndex = this.rowSelector.staffManager.staffMembers.findIndex(
       (staff) => staff.email === selectedStaffMember.email
     );
+
     if (staffIndex !== -1) {
       this.rowSelector.staffManager.staffMembers[staffIndex] =
         selectedStaffMember;
     }
+
+    // Log the updated staff member in the manager
+    console.log(
+      "Updated staff in manager:",
+      this.rowSelector.staffManager.staffMembers[staffIndex]
+    );
 
     // Update the selected row in the table
     const selectedRow = this.rowSelector.selectedRow;
@@ -385,14 +403,14 @@ class staffOut {
       `);
 
       // Update the data attribute on the row
-      selectedRow.data("staffMember", JSON.stringify(selectedStaffMember));
+      selectedRow.data("staffMember", selectedStaffMember);
     }
 
-    // Log for debugging purposes
-    console.log("Updated staff member:", selectedStaffMember);
-    console.log("Updated staff list:", this.rowSelector.staffManager.staffMembers);
+    // Manually trigger check for late staff for debugging
+    this.rowSelector.staffManager.checkAllLateStaff();
   }
 }
+
 
 
 //Clicking ‘In’ updates the relevant staff member’s object and updates the Staff table from the object.
@@ -681,7 +699,7 @@ $(document).ready(() => {
   // Check for late staff every minute
   setInterval(() => {
     staffManager.checkAllLateStaff();
-  }, 60000);
+  }, 10000);
 
   $("#log-staff").on("click", () => {
     console.log("Logging all staff members:");
