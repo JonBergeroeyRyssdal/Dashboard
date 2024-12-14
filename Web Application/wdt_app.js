@@ -614,6 +614,18 @@ class addDelivery {
   
     // Check if the new driver is late
     newDriver.deliveryDriverIsLate();
+  
+    // Clear the form fields after successful addition
+    this.clearScheduleDeliveryForm();
+  }
+  clearScheduleDeliveryForm() {
+    // Clear all fields in the schedule delivery form
+    document.querySelector("#scheduleDelivery select").value = ""; // Reset the select field
+    document.querySelector("#scheduleDelivery input[placeholder='Enter name']").value = ""; // Clear name
+    document.querySelector("#scheduleDelivery input[placeholder='Enter surname']").value = ""; // Clear surname
+    document.querySelector("#scheduleDelivery input[placeholder='Enter phone number']").value = ""; // Clear phone
+    document.querySelector("#scheduleDelivery input[placeholder='Enter delivery address']").value = ""; // Clear address
+    document.querySelector("#scheduleDelivery input[type='time']").value = ""; // Clear time field
   }
   
 
