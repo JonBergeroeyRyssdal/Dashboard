@@ -123,17 +123,17 @@ class DeliveryDriver extends Employee {
       console.warn(`No return time set for ${this.name} ${this.surname}`);
       return;
     }
-
+  
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.returnTime);
     const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60); // Time difference in minutes
-
+  
     // Log key variables for debugging
     console.log(`Driver: ${this.name} ${this.surname}`);
     console.log(`Current Time: ${currentTime}`);
     console.log(`Expected Return Time: ${expectedReturnTime}`);
     console.log(`Time Difference (in minutes): ${timeDifference}`);
-
+  
     // Ensure the notification is not repeated
     if (!notifiedDeliveryDrivers[this.telephone]) {
       notifiedDeliveryDrivers[this.telephone] = {
@@ -141,7 +141,7 @@ class DeliveryDriver extends Employee {
         dismissed: false,
       };
     }
-
+  
     const driverStatus = notifiedDeliveryDrivers[this.telephone];
     if (
       timeDifference > 1 &&
@@ -149,13 +149,26 @@ class DeliveryDriver extends Employee {
       !driverStatus.dismissed
     ) {
       driverStatus.notified = true; // Mark as notified
-
+  
       const minutesLate = Math.floor(timeDifference);
-
+  
+      // Format the expected return time to hh:mm
+      const formattedReturnTime = expectedReturnTime.toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false, // 24-hour format
+      });
+  
+      // Determine the vehicle icon
+      const vehicleIcon =
+        this.vehicle === "Car"
+          ? `<i class="fas fa-car"></i>` // Font Awesome car icon
+          : `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorcycle icon
+  
       console.log(
         `Driver ${this.name} is ${minutesLate} minutes late. Showing toast.`
       );
-
+  
       // Create the toast element
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-warning", "text-black");
@@ -163,20 +176,21 @@ class DeliveryDriver extends Employee {
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
       toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
-
+  
       toastElement.innerHTML = `
         <div class="toast-header">
-          <strong class="me-auto">${this.vehicle} ${this.name} ${this.surname}</strong>
+          <span class="me-2">${vehicleIcon}</span> <!-- Add vehicle icon here -->
+          <strong class="me-auto">${this.name} ${this.surname}</strong>
           <button type="button" class="btn-close btn-close-black" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
           Delivery driver ${this.name} ${this.surname} is ${minutesLate} minute(s) late.<br>
           <strong>Phone:</strong> ${this.telephone}<br>
           <strong>Address:</strong> ${this.deliveryAddress}<br>
-          <strong>Estimated Return Time:</strong> ${this.returnTime}
+          <strong>Estimated Return Time:</strong> ${formattedReturnTime}
         </div>
       `;
-
+  
       // Append toast to the container
       const toastContainer = document.querySelector(".toast-container");
       if (!toastContainer) {
@@ -184,17 +198,19 @@ class DeliveryDriver extends Employee {
         return;
       }
       toastContainer.appendChild(toastElement);
-
+  
       // Show the toast using Bootstrap
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
-
+  
       // Mark as dismissed if the user closes the toast
       toastElement.addEventListener("hidden.bs.toast", () => {
         driverStatus.dismissed = true; // Mark as dismissed
       });
     }
   }
+  
+  
 }
 
 // Correct API call/s made on page load.
@@ -590,24 +606,35 @@ class addDelivery {
       deliveryDriver.vehicle === "Car"
         ? `<i class="fas fa-car"></i>` // Font Awesome car icon
         : `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
-
+  
+    // Parse the ISO string to a Date object
+    const returnTime = new Date(deliveryDriver.returnTime);
+  
+    // Format the time as hh:mm
+    const formattedTime = returnTime.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false, // Use 24-hour format
+    });
+  
     const newRow = document.createElement("tr");
-
+  
     newRow.innerHTML = `
       <td class="text-center">${vehicleIcon}</td>
       <td class="text-center">${deliveryDriver.name}</td>
       <td class="text-center">${deliveryDriver.surname}</td>
       <td class="text-center">${deliveryDriver.telephone}</td>
       <td class="text-center">${deliveryDriver.deliveryAddress}</td>
-      <td class="text-center">${deliveryDriver.returnTime}</td>
+      <td class="text-center">${formattedTime}</td> <!-- Display formatted time -->
     `;
-
+  
     // Attach data-deliveryDriver to the row
     $(newRow).data("deliveryDriver", JSON.stringify(deliveryDriver));
-
+  
     // Append the new row to the delivery board table
     this.deliveryBoardTable.appendChild(newRow);
   }
+  
 }
 
 class DeliveryRowSelector {
