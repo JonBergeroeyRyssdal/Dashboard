@@ -10,8 +10,7 @@ class Employee {
 
 // Child 1
 
-//Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
-//(There must be a staffMemberIsLate function)
+
 // StaffMember Class
 // Object to track notified and dismissed staff members
 const notifiedStaffMembers = {};
@@ -36,7 +35,8 @@ class StaffMember extends Employee {
     this.duration = duration;
     this.expectedReturnTime = expectedReturnTime;
   }
-
+  //Toast should be shown, with the correct information, when a staff member has not returned by the expected return time. The notification should appear only once, and the receptionist must close or clear the notification.
+  //(There must be a staffMemberIsLate function)
   staffMemberIsLate() {
     // Ensure expectedReturnTime is valid
     if (!this.expectedReturnTime) {
@@ -101,7 +101,6 @@ class StaffMember extends Employee {
       });
     }
   }
-  
 }
 
 // Child 2
@@ -426,10 +425,6 @@ class staffOut {
     this.rowSelector.staffManager.checkAllLateStaff();
   }
 }
-
-
-
-
 
 //Clicking ‘In’ updates the relevant staff member’s object and updates the Staff table from the object.
 //(There must be a staffIn function)
