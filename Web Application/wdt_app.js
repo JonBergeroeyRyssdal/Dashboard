@@ -74,7 +74,7 @@ class StaffMember extends Employee {
   
       toastElement.innerHTML = `
         <div class="toast-header">
-          <img src="${this.picture}" class="rounded me-2" alt="Profile Picture" style="height: 30px; width: 30px;">
+          <img src="${this.picture}" class="rounded me-2" alt="Profile Picture" style="height: 50px; width: 50px;">
           <strong class="me-auto">${this.name} ${this.surname}</strong>
           <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
@@ -214,8 +214,16 @@ class staffUserGet {
     const tableBody = document.getElementById("staffTable");
     tableBody.innerHTML = ""; // Clear existing rows
     staffMembers.forEach((staffMember) => {
+      // Format expectedReturnTime for display (if not null)
+      const formattedExpectedReturnTime = staffMember.expectedReturnTime
+        ? new Date(staffMember.expectedReturnTime).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "";
+  
       const row = document.createElement("tr");
-
+  
       row.innerHTML = `
         <td>
           <img
@@ -231,16 +239,18 @@ class staffUserGet {
         <td>${staffMember.status}</td>
         <td>${staffMember.outTime || ""}</td>
         <td>${staffMember.duration || ""}</td>
-        <td>${staffMember.expectedReturnTime || ""}</td>
+        <td>${formattedExpectedReturnTime}</td>
       `;
-
+  
       // Store the StaffMember object directly in the row's data
       $(row).data("staffMember", staffMember);
-
+  
       // Append the row to the table body
       tableBody.appendChild(row);
     });
   }
+  
+  
 
   checkAllLateStaff() {
     console.log("Checking for late staff members...");
@@ -343,6 +353,12 @@ class staffOut {
       currentTime.getTime() + parsedMinutes * 60000
     );
 
+    // Format expectedReturnTime for display (HH:mm)
+    const formattedReturnTime = expectedReturnTime.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
     // Calculate hours and minutes for the duration
     const hours = Math.floor(parsedMinutes / 60);
     const minutes = parsedMinutes % 60;
@@ -360,7 +376,7 @@ class staffOut {
       minute: "2-digit",
     });
     selectedStaffMember.duration = formattedDuration;
-    selectedStaffMember.expectedReturnTime = expectedReturnTime.toISOString();
+    selectedStaffMember.expectedReturnTime = expectedReturnTime.toISOString(); // Store in ISO format
 
     // Log after the update
     console.log("After update:", selectedStaffMember);
@@ -399,7 +415,7 @@ class staffOut {
         <td>${selectedStaffMember.status}</td>
         <td>${selectedStaffMember.outTime || ""}</td>
         <td>${selectedStaffMember.duration || ""}</td>
-        <td>${selectedStaffMember.expectedReturnTime || ""}</td>
+        <td>${formattedReturnTime || ""}</td> <!-- Display formatted time -->
       `);
 
       // Update the data attribute on the row
@@ -410,6 +426,8 @@ class staffOut {
     this.rowSelector.staffManager.checkAllLateStaff();
   }
 }
+
+
 
 
 
@@ -700,11 +718,4 @@ $(document).ready(() => {
   setInterval(() => {
     staffManager.checkAllLateStaff();
   }, 10000);
-
-  $("#log-staff").on("click", () => {
-    console.log("Logging all staff members:");
-    staffManager.staffMembers.forEach((staffMember) => {
-      console.log(staffMember);
-    });
-  });
 });
