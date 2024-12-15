@@ -58,21 +58,6 @@ This project involves creating a **Reception Management Dashboard** for **WeDeli
 
 - No backend is required. The system runs entirely on the client-side using HTML, CSS, and JavaScript.
 - Ensure you have a stable internet connection to load external libraries via CDN.
-- Clone the repository: 
-  ```bash
-  git clone <repository-url>
-  cd <project-folder>
+- Open index.html in your browser to run the project.
 
----
-
-### Contribution Guidelines
-
-1. Fork this repository and create your own feature branch.
-2. Commit your changes with clear, concise commit messages.
-3. Push your changes and create a pull request to the main repository.
-
----
-
-### License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
