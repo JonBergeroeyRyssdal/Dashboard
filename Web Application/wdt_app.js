@@ -620,7 +620,6 @@ class addDelivery {
   }
   clearScheduleDeliveryForm() {
     // Clear all fields in the schedule delivery form
-    document.querySelector("#scheduleDelivery select").value = ""; // Reset the select field
     document.querySelector("#scheduleDelivery input[placeholder='Enter name']").value = ""; // Clear name
     document.querySelector("#scheduleDelivery input[placeholder='Enter surname']").value = ""; // Clear surname
     document.querySelector("#scheduleDelivery input[placeholder='Enter phone number']").value = ""; // Clear phone
