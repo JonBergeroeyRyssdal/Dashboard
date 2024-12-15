@@ -1,3 +1,5 @@
+
+
 // Parent
 class Employee {
   constructor(name, surname) {
@@ -6,7 +8,6 @@ class Employee {
   }
 }
 
-// StaffMember Class
 // Object to track notified and dismissed staff members
 const notifiedStaffMembers = {};
 
@@ -108,6 +109,7 @@ class StaffMember extends Employee {
 // Object to track notified and dismissed delivery drivers
 const notifiedDeliveryDrivers = {};
 
+// DeliveryDriver Class
 class DeliveryDriver extends Employee {
   constructor(name, surname, vehicle, telephone, deliveryAddress, returnTime) {
     super(name, surname);
@@ -209,6 +211,32 @@ class DeliveryDriver extends Employee {
   }
 }
 
+// Renders staff rows. 
+class TableUtils {
+  static renderRowHtml(staffMember) {
+    return `
+      <td>
+        <img
+          src="${staffMember.picture}"
+          alt="Profile Picture"
+          class="img-fluid rounded-circle"
+          style="width: 50px; height: 50px"
+        />
+      </td>
+      <td>${staffMember.name}</td>
+      <td>${staffMember.surname}</td>
+      <td>${staffMember.email}</td>
+      <td>${staffMember.status}</td>
+      <td>${staffMember.outTime || ""}</td>
+      <td>${staffMember.duration || ""}</td>
+      <td>${staffMember.expectedReturnTime ? new Date(staffMember.expectedReturnTime).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }) : ""}</td>
+    `;
+  }
+}
+
 // Correct API call/s made on page load.
 // The API JSON String response should be converted into a JS object/s, then used to create relevant class objects.
 //Inheritance is used in object creation, using the data from the API call.
@@ -220,6 +248,7 @@ class staffUserGet {
     this.staffMembers = []; // Store all staff members
   }
 
+  // Fetch staff members from the API
   async getUsers() {
     try {
       const response = await fetch("https://randomuser.me/api/?results=5");
@@ -238,6 +267,7 @@ class staffUserGet {
     }
   }
 
+  // Create staff member objects
   createStaffMembers(users) {
     return users.map((user) => {
       const name = user.name.first;
@@ -259,37 +289,16 @@ class staffUserGet {
     });
   }
 
+  // Append staff members to the table
   appendToTable(staffMembers) {
     const tableBody = document.getElementById("staffTable");
     tableBody.innerHTML = ""; // Clear existing rows
-    staffMembers.forEach((staffMember) => {
-      // Format expectedReturnTime for display (if not null)
-      const formattedExpectedReturnTime = staffMember.expectedReturnTime
-        ? new Date(staffMember.expectedReturnTime).toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-          })
-        : "";
 
+    staffMembers.forEach((staffMember) => {
       const row = document.createElement("tr");
 
-      row.innerHTML = `
-        <td>
-          <img
-            src="${staffMember.picture}"
-            alt="Profile Picture"
-            class="img-fluid rounded-circle"
-            style="width: 50px; height: 50px"
-          />
-        </td>
-        <td>${staffMember.name}</td>
-        <td>${staffMember.surname}</td>
-        <td>${staffMember.email}</td>
-        <td>${staffMember.status}</td>
-        <td>${staffMember.outTime || ""}</td>
-        <td>${staffMember.duration || ""}</td>
-        <td>${formattedExpectedReturnTime}</td>
-      `;
+      // Use the renderRowHtml utility function to populate the row's content
+      row.innerHTML = TableUtils.renderRowHtml(staffMember);
 
       // Store the StaffMember object directly in the row's data
       $(row).data("staffMember", staffMember);
@@ -299,13 +308,11 @@ class staffUserGet {
     });
   }
 
+  // Check for late staff members
   checkAllLateStaff() {
-    // console.log("Checking for late staff members...");
-
     this.staffMembers.forEach((staffMember) => {
-      //   console.log(`Checking ${staffMember.name} ${staffMember.surname}...`);
       if (staffMember instanceof StaffMember) {
-        staffMember.staffMemberIsLate();
+        staffMember.staffMemberIsLate(); // Call the staffMemberIsLate function
       } else {
         console.error(
           "staffMember is not an instance of StaffMember:",
@@ -376,12 +383,11 @@ class StaffRowSelector {
 
 class staffOut {
   constructor(rowSelector) {
-    this.rowSelector = rowSelector; // Reference to the row selector
+    this.rowSelector = rowSelector;
   }
 
   execute() {
-    const selectedStaffMember =
-      this.rowSelector.staffManager.selectedStaffMember;
+    const selectedStaffMember = this.rowSelector.staffManager.selectedStaffMember;
 
     if (!selectedStaffMember) {
       alert("Please select a staff member first.");
@@ -402,20 +408,12 @@ class staffOut {
       currentTime.getTime() + parsedMinutes * 60000
     );
 
-    // Format expectedReturnTime for display (HH:mm)
-    const formattedReturnTime = expectedReturnTime.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-
-    // Calculate hours and minutes for the duration
+    // Format duration
     const hours = Math.floor(parsedMinutes / 60);
     const minutes = parsedMinutes % 60;
-    const formattedDuration = `${hours}h:${minutes
-      .toString()
-      .padStart(2, "0")}m`;
+    const formattedDuration = `${hours}h:${minutes.toString().padStart(2, "0")}m`;
 
-    // Update the staff member's object
+    // Update the object properties
     selectedStaffMember.status = "Out";
     selectedStaffMember.outTime = currentTime.toLocaleTimeString([], {
       hour: "2-digit",
@@ -424,42 +422,14 @@ class staffOut {
     selectedStaffMember.duration = formattedDuration;
     selectedStaffMember.expectedReturnTime = expectedReturnTime.toISOString(); // Store in ISO format
 
-    // Update the staffManager.staffMembers array to reflect changes
-    const staffIndex = this.rowSelector.staffManager.staffMembers.findIndex(
-      (staff) => staff.email === selectedStaffMember.email
-    );
-
-    if (staffIndex !== -1) {
-      this.rowSelector.staffManager.staffMembers[staffIndex] =
-        selectedStaffMember;
-    }
-
-    // Update the selected row in the table
+    // Find the selected row and update its HTML dynamically
     const selectedRow = this.rowSelector.selectedRow;
     if (selectedRow) {
-      selectedRow.html(`
-        <td>
-          <img
-            src="${selectedStaffMember.picture}"
-            alt="Profile Picture"
-            class="img-fluid rounded-circle"
-            style="width: 50px; height: 50px"
-          />
-        </td>
-        <td>${selectedStaffMember.name}</td>
-        <td>${selectedStaffMember.surname}</td>
-        <td>${selectedStaffMember.email}</td>
-        <td>${selectedStaffMember.status}</td>
-        <td>${selectedStaffMember.outTime || ""}</td>
-        <td>${selectedStaffMember.duration || ""}</td>
-        <td>${formattedReturnTime || ""}</td> <!-- Display formatted time -->
-      `);
-
-      // Update the data attribute on the row
-      selectedRow.data("staffMember", selectedStaffMember);
+      selectedRow.html(TableUtils.renderRowHtml(selectedStaffMember)); // Update the row
+      selectedRow.data("staffMember", selectedStaffMember); // Update the row's data attribute
     }
 
-    // Manually trigger check for late staff for debugging
+    // Optionally trigger a late staff check immediately
     this.rowSelector.staffManager.checkAllLateStaff();
   }
 }
@@ -472,47 +442,28 @@ class staffIn {
   }
 
   execute() {
-    const selectedStaffMember =
-      this.rowSelector.staffManager.selectedStaffMember;
+    const selectedStaffMember = this.rowSelector.staffManager.selectedStaffMember;
 
     if (!selectedStaffMember) {
       alert("Please select a staff member first.");
       return;
     }
 
-    // Update the status of the selected staff member
+    // Update the object properties
     selectedStaffMember.status = "In";
     selectedStaffMember.outTime = null;
     selectedStaffMember.duration = null;
     selectedStaffMember.expectedReturnTime = null;
 
-    // Update the selected row directly
+    // Find the selected row and update its HTML dynamically
     const selectedRow = this.rowSelector.selectedRow;
     if (selectedRow) {
-      // Update the row with the new status
-      $(selectedRow).html(`
-        <td>
-          <img
-            src="${selectedStaffMember.picture}"
-            alt="Profile Picture"
-            class="img-fluid rounded-circle"
-            style="width: 50px; height: 50px"
-          />
-        </td>
-        <td>${selectedStaffMember.name}</td>
-        <td>${selectedStaffMember.surname}</td>
-        <td>${selectedStaffMember.email}</td>
-        <td>${selectedStaffMember.status}</td>
-        <td>${selectedStaffMember.outTime || ""}</td>
-        <td>${selectedStaffMember.duration || ""}</td>
-        <td>${selectedStaffMember.expectedReturnTime || ""}</td>
-      `);
-
-      // Update the row's data attribute
-      $(selectedRow).data("staffMember", JSON.stringify(selectedStaffMember));
+      selectedRow.html(TableUtils.renderRowHtml(selectedStaffMember)); // Update the row
+      selectedRow.data("staffMember", selectedStaffMember); // Update the row's data attribute
     }
   }
 }
+
 
 //Delivery Driver information is manually entered into input elements in the Delivery Driver table. The table is populated with the Delivery Driver object data.
 //(There must be an addDelivery function that adds the delivery driver’s information to the Delivery Board table)
