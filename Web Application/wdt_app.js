@@ -37,38 +37,34 @@ class StaffMember extends Employee {
     if (!this.expectedReturnTime) {
       return;
     }
-  
+
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.expectedReturnTime);
     const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60); // Time difference in minutes
-  
-    console.log(`${this.name} ${this.surname}: Current Time: ${currentTime}`);
-    console.log(
-      `${this.name} ${this.surname}: Expected Return Time: ${expectedReturnTime}`
-    );
-    console.log(
-      `${this.name} ${this.surname}: Time Difference: ${timeDifference} minutes`
-    );
-  
+
     // Ensure the notification is not repeated
     if (!notifiedStaffMembers[this.email]) {
-      notifiedStaffMembers[this.email] = { notified: false, dismissed: false, toastElement: null };
+      notifiedStaffMembers[this.email] = {
+        notified: false,
+        dismissed: false,
+        toastElement: null,
+      };
     }
-  
+
     const staffStatus = notifiedStaffMembers[this.email];
-  
+
     if (timeDifference > 1 && !staffStatus.notified && !staffStatus.dismissed) {
       staffStatus.notified = true; // Mark as notified
-  
+
       const minutesLate = Math.floor(timeDifference);
-  
+
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-danger", "text-white");
       toastElement.setAttribute("role", "alert");
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
       toastElement.setAttribute("data-bs-autohide", "false"); // Disable auto-hide
-  
+
       toastElement.innerHTML = `
         <div class="toast-header">
           <img src="${this.picture}" class="rounded me-2" alt="Profile Picture" style="height: 50px; width: 50px;">
@@ -79,31 +75,27 @@ class StaffMember extends Employee {
           Staff member ${this.name} ${this.surname} is <span class="minutes-late">${minutesLate}</span> minute(s) late.
         </div>
       `;
-  
+
       const toastContainer = document.querySelector(".toast-container");
-      if (!toastContainer) {
-        console.error("Toast container not found.");
-        return;
-      }
       toastContainer.appendChild(toastElement);
-  
+
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
-  
+
       // Store the toast element for updates
       staffStatus.toastElement = toastElement;
-  
+
       // Mark as dismissed if the user closes the toast
       toastElement.addEventListener("hidden.bs.toast", () => {
         staffStatus.dismissed = true;
       });
-  
+
       // Update the "minutes late" dynamically
       setInterval(() => {
         const currentTime = new Date();
         const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60);
         const updatedMinutesLate = Math.floor(timeDifference);
-  
+
         const minutesLateElement = toastElement.querySelector(".minutes-late");
         if (minutesLateElement) {
           minutesLateElement.textContent = updatedMinutesLate; // Update the text dynamically
@@ -111,7 +103,6 @@ class StaffMember extends Employee {
       }, 60000); // Update every minute
     }
   }
-  
 }
 
 // Object to track notified and dismissed delivery drivers
@@ -129,19 +120,13 @@ class DeliveryDriver extends Employee {
   //(There must be a deliveryDriverIsLate function)
   deliveryDriverIsLate() {
     if (!this.returnTime) {
-      console.warn(`No return time set for ${this.name} ${this.surname}`);
       return;
     }
-  
+
     const currentTime = new Date();
     const expectedReturnTime = new Date(this.returnTime);
     const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60);
-  
-    console.log(`Driver: ${this.name} ${this.surname}`);
-    console.log(`Current Time: ${currentTime}`);
-    console.log(`Expected Return Time: ${expectedReturnTime}`);
-    console.log(`Time Difference (in minutes): ${timeDifference}`);
-  
+
     if (!notifiedDeliveryDrivers[this.telephone]) {
       notifiedDeliveryDrivers[this.telephone] = {
         notified: false,
@@ -149,34 +134,34 @@ class DeliveryDriver extends Employee {
         toastElement: null, // Store a reference to the toast element
       };
     }
-  
+
     const driverStatus = notifiedDeliveryDrivers[this.telephone];
-  
+
     if (
       timeDifference > 1 &&
       !driverStatus.notified &&
       !driverStatus.dismissed
     ) {
       driverStatus.notified = true;
-  
+
       const formattedReturnTime = expectedReturnTime.toLocaleTimeString([], {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
       });
-  
+
       const vehicleIcon =
         this.vehicle === "Car"
           ? `<i class="fas fa-car"></i>`
           : `<i class="fas fa-motorcycle"></i>`;
-  
+
       const toastElement = document.createElement("div");
       toastElement.classList.add("toast", "bg-warning", "text-black");
       toastElement.setAttribute("role", "alert");
       toastElement.setAttribute("aria-live", "assertive");
       toastElement.setAttribute("aria-atomic", "true");
       toastElement.setAttribute("data-bs-autohide", "false");
-  
+
       toastElement.innerHTML = `
         <div class="toast-header">
           <span class="me-2">${vehicleIcon}</span>
@@ -184,39 +169,37 @@ class DeliveryDriver extends Employee {
           <button type="button" class="btn-close btn-close-black" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
         <div class="toast-body">
-          Delivery driver ${this.name} ${this.surname} is <span class="minutes-late">${Math.floor(
-            timeDifference
-          )}</span> minute(s) late.<br>
+          Delivery driver ${this.name} ${
+        this.surname
+      } is <span class="minutes-late">${Math.floor(
+        timeDifference
+      )}</span> minute(s) late.<br>
           <strong>Phone:</strong> ${this.telephone}<br>
           <strong>Address:</strong> ${this.deliveryAddress}<br>
           <strong>Estimated Return Time:</strong> ${formattedReturnTime}
         </div>
       `;
-  
+
       const toastContainer = document.querySelector(".toast-container");
-      if (!toastContainer) {
-        console.error("Toast container not found.");
-        return;
-      }
       toastContainer.appendChild(toastElement);
-  
+
       const toast = new bootstrap.Toast(toastElement);
       toast.show();
-  
+
       // Store the toast element for updates
       driverStatus.toastElement = toastElement;
-  
+
       // Mark as dismissed when the user closes the toast
       toastElement.addEventListener("hidden.bs.toast", () => {
         driverStatus.dismissed = true;
       });
-  
+
       // Start updating the "minutes late" dynamically
       setInterval(() => {
         const currentTime = new Date();
         const timeDifference = (currentTime - expectedReturnTime) / (1000 * 60);
         const minutesLate = Math.floor(timeDifference);
-  
+
         const minutesLateElement = toastElement.querySelector(".minutes-late");
         if (minutesLateElement) {
           minutesLateElement.textContent = minutesLate; // Update the text dynamically
@@ -224,9 +207,6 @@ class DeliveryDriver extends Employee {
       }, 60000); // Update every minute
     }
   }
-  
-  
-  
 }
 
 // Correct API call/s made on page load.
@@ -435,9 +415,6 @@ class staffOut {
       .toString()
       .padStart(2, "0")}m`;
 
-    // Log before the update
-    console.log("Before update:", selectedStaffMember);
-
     // Update the staff member's object
     selectedStaffMember.status = "Out";
     selectedStaffMember.outTime = currentTime.toLocaleTimeString([], {
@@ -446,9 +423,6 @@ class staffOut {
     });
     selectedStaffMember.duration = formattedDuration;
     selectedStaffMember.expectedReturnTime = expectedReturnTime.toISOString(); // Store in ISO format
-
-    // Log after the update
-    console.log("After update:", selectedStaffMember);
 
     // Update the staffManager.staffMembers array to reflect changes
     const staffIndex = this.rowSelector.staffManager.staffMembers.findIndex(
@@ -459,12 +433,6 @@ class staffOut {
       this.rowSelector.staffManager.staffMembers[staffIndex] =
         selectedStaffMember;
     }
-
-    // Log the updated staff member in the manager
-    console.log(
-      "Updated staff in manager:",
-      this.rowSelector.staffManager.staffMembers[staffIndex]
-    );
 
     // Update the selected row in the table
     const selectedRow = this.rowSelector.selectedRow;
@@ -560,21 +528,32 @@ class addDelivery {
   createDeliveryDriver() {
     // Fetch form values
     const vehicle = document.querySelector("#scheduleDelivery select").value;
-    const name = document.querySelector("#scheduleDelivery input[placeholder='Enter name']").value.trim();
-    const surname = document.querySelector("#scheduleDelivery input[placeholder='Enter surname']").value.trim();
-    const phone = document.querySelector("#scheduleDelivery input[placeholder='Enter phone number']").value.trim();
-    const address = document.querySelector("#scheduleDelivery input[placeholder='Enter delivery address']").value.trim();
-    const returnTime = document.querySelector("#scheduleDelivery input[type='time']").value;
-  
-    // Log the returnTime for debugging
-    console.log(`Return Time Entered: ${returnTime}`);
-  
+    const name = document
+      .querySelector("#scheduleDelivery input[placeholder='Enter name']")
+      .value.trim();
+    const surname = document
+      .querySelector("#scheduleDelivery input[placeholder='Enter surname']")
+      .value.trim();
+    const phone = document
+      .querySelector(
+        "#scheduleDelivery input[placeholder='Enter phone number']"
+      )
+      .value.trim();
+    const address = document
+      .querySelector(
+        "#scheduleDelivery input[placeholder='Enter delivery address']"
+      )
+      .value.trim();
+    const returnTime = document.querySelector(
+      "#scheduleDelivery input[type='time']"
+    ).value;
+
     // Input validation
     if (!name || !surname || !phone || !address || !returnTime) {
       alert("Please fill in all fields.");
       return;
     }
-  
+
     // Combine current date with returnTime
     const currentDate = new Date(); // Get the current date
     const [hours, minutes] = returnTime.split(":"); // Split returnTime into hours and minutes
@@ -586,13 +565,13 @@ class addDelivery {
       parseInt(minutes),
       0
     );
-  
+
     if (isNaN(combinedReturnTime)) {
       console.error("Invalid combined return time.");
       alert("Please enter a valid return time.");
       return;
     }
-  
+
     // Create a new DeliveryDriver object
     const newDriver = new DeliveryDriver(
       name,
@@ -602,50 +581,54 @@ class addDelivery {
       address,
       combinedReturnTime.toISOString() // Store in ISO format
     );
-  
-    // Log the created driver for debugging
-    console.log("Created Delivery Driver:", newDriver);
-  
+
     // Add the new driver to the array
     this.deliveryDrivers.push(newDriver);
-  
+
     // Add a new row to the delivery board
     this.addRowToDeliveryBoard(newDriver);
-  
+
     // Check if the new driver is late
     newDriver.deliveryDriverIsLate();
-  
+
     // Clear the form fields after successful addition
     this.clearScheduleDeliveryForm();
   }
   clearScheduleDeliveryForm() {
     // Clear all fields in the schedule delivery form
-    document.querySelector("#scheduleDelivery input[placeholder='Enter name']").value = ""; // Clear name
-    document.querySelector("#scheduleDelivery input[placeholder='Enter surname']").value = ""; // Clear surname
-    document.querySelector("#scheduleDelivery input[placeholder='Enter phone number']").value = ""; // Clear phone
-    document.querySelector("#scheduleDelivery input[placeholder='Enter delivery address']").value = ""; // Clear address
+    document.querySelector(
+      "#scheduleDelivery input[placeholder='Enter name']"
+    ).value = ""; // Clear name
+    document.querySelector(
+      "#scheduleDelivery input[placeholder='Enter surname']"
+    ).value = ""; // Clear surname
+    document.querySelector(
+      "#scheduleDelivery input[placeholder='Enter phone number']"
+    ).value = ""; // Clear phone
+    document.querySelector(
+      "#scheduleDelivery input[placeholder='Enter delivery address']"
+    ).value = ""; // Clear address
     document.querySelector("#scheduleDelivery input[type='time']").value = ""; // Clear time field
   }
-  
 
   addRowToDeliveryBoard(deliveryDriver) {
     let vehicleIcon =
       deliveryDriver.vehicle === "Car"
         ? `<i class="fas fa-car"></i>` // Font Awesome car icon
         : `<i class="fas fa-motorcycle"></i>`; // Font Awesome motorbike icon
-  
+
     // Parse the ISO string to a Date object
     const returnTime = new Date(deliveryDriver.returnTime);
-  
+
     // Format the time as hh:mm
     const formattedTime = returnTime.toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false, // Use 24-hour format
     });
-  
+
     const newRow = document.createElement("tr");
-  
+
     newRow.innerHTML = `
       <td class="text-center">${vehicleIcon}</td>
       <td class="text-center">${deliveryDriver.name}</td>
@@ -654,14 +637,13 @@ class addDelivery {
       <td class="text-center">${deliveryDriver.deliveryAddress}</td>
       <td class="text-center">${formattedTime}</td> <!-- Display formatted time -->
     `;
-  
+
     // Attach data-deliveryDriver to the row
     $(newRow).data("deliveryDriver", JSON.stringify(deliveryDriver));
-  
+
     // Append the new row to the delivery board table
     this.deliveryBoardTable.appendChild(newRow);
   }
-  
 }
 
 class DeliveryRowSelector {
@@ -780,11 +762,6 @@ $(document).ready(() => {
   const staffManager = new staffUserGet();
   staffManager.getUsers();
 
-  // Check for late staff every minute
-  setInterval(() => {
-    staffManager.checkAllLateStaff();
-  }, 60000);
-
   // Initialize the row selector after the table is populated
   const rowSelector = new StaffRowSelector("#staffTable", staffManager);
 
@@ -819,22 +796,16 @@ $(document).ready(() => {
   $("#clear-button").on("click", () => {
     clearHandler.execute();
   });
-  // Check for late staff every minute
   setInterval(() => {
     staffManager.checkAllLateStaff();
-  }, 10000);
 
-  // Periodically check for late delivery drivers
-  setInterval(() => {
     if (
       deliveryHandler.deliveryDrivers &&
       deliveryHandler.deliveryDrivers.length > 0
     ) {
       deliveryHandler.deliveryDrivers.forEach((driver) => {
-        driver.deliveryDriverIsLate(); // Check each driver's lateness
+        driver.deliveryDriverIsLate();
       });
-    } else {
-      console.log("No delivery drivers to check.");
     }
-  }, 10000); // Check every minute
+  }, 60000); // Run both checks every minute
 });
