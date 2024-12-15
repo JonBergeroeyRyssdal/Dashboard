@@ -31,45 +31,37 @@ This project involves creating a **Reception Management Dashboard** for **WeDeli
 
 ---
 
-### Features
-- **User Roles:** 
-   - Admins can manage the system and view all data.
-   - Employees can manage deliveries and track packages.
+### Technologies & Libraries Used
 
-- **Package Tracking:** 
-   - Track package arrival, status, and delivery details.
-
-- **Delivery Reporting:** 
-   - Generate daily, weekly, or custom reports for deliveries received.
-
-- **Security:** 
-   - User authentication and role-based authorization are implemented for system access control.
-
-- **Notifications:** 
-   - Email notifications when a package is delivered, or a task is completed.
-
----
-
-### Technologies Used
 - **Bootstrap 5**: For the layout and responsive design.
-- **jQuery**: For handling DOM manipulation and event handling.
-- **API**: `https://randomuser.me/` for generating demo staff data.
+  - Included via CDN.
+  - Link: `<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">`
+  - JavaScript: `<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>`
 
-- **Version Control:** Git, GitHub
+- **jQuery**: For handling DOM manipulation and event handling.
+  - Included via CDN.
+  - Link: `<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>`
+
+- **Font Awesome**: For icons such as car and motorcycle.
+  - Included via CDN.
+  - Link: `<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">`
+
+- **Random User API**: Used to generate demo staff data.
+  - API Endpoint: `https://randomuser.me/api/`
+  - No setup is required; fetch requests are made directly from the client-side.
+
+- **Version Control**: Git, GitHub.
 
 ---
 
 ### Installation & Setup
 
-- No backend required. The system runs entirely on the client-side using HTML, CSS, and JavaScript.
-
-- **External Libraries Used**:
-  - Bootstrap 5 (included via CDN)
-  - jQuery (included via CDN)
-  - Random User API (used to generate demo staff)
-  - Font awsome for icons
-
-   ```
+- No backend is required. The system runs entirely on the client-side using HTML, CSS, and JavaScript.
+- Ensure you have a stable internet connection to load external libraries via CDN.
+- Clone the repository: 
+  ```bash
+  git clone <repository-url>
+  cd <project-folder>
 
 ---
 
