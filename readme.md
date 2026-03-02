@@ -1,4 +1,4 @@
-## Project: Reception Management Dashboard for WeDeliverTECH™
+## Reception Management Dashboard for WeDeliverTECH™
 
 ### Project Description
 This project involves creating a **Reception Management Dashboard** for **WeDeliverTECH™**, a fictional company. The dashboard allows employees and administrators to manage deliveries, track packages, and generate reports for an efficient reception process.
